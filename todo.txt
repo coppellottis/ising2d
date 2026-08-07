@@ -1,0 +1,460 @@
+=====================================================
+2D ISING MODEL - WOLFF CLUSTER UPDATE
+Development roadmap and debugging checklist
+=====================================================
+
+
+FASE 0 - Setup progetto
+=======================
+
+[ ] Creare struttura cartelle:
+
+    src/
+    include/
+    data/
+    results/
+    analysis/
+
+[ ] Creare Makefile
+
+[ ] Verificare compilazione minima:
+
+    make
+
+[ ] Creare main.c vuoto che stampa:
+
+    "Ising simulation started"
+
+[ ] Verificare che il linking funzioni.
+
+
+=====================================================
+FASE 1 - Random Number Generator (PCG32)
+=====================================================
+
+Obiettivo:
+avere un RNG funzionante e isolato.
+
+File:
+
+    src/rng.c
+    include/rng.h
+    src/pcg_basic.c
+    include/pcg_basic.h
+
+
+Implementare:
+
+[ ] seed_rng()
+
+[ ] uniform_random()
+
+[ ] random_int()
+
+
+TEST:
+
+[ ] Stampare 100 numeri casuali
+
+[ ] Controllare range:
+
+    0 <= r < 1
+
+
+[ ] Provare due seed diversi:
+
+    stesso seed -> stessa sequenza
+
+    seed diverso -> sequenza diversa
+
+
+=====================================================
+FASE 2 - Struttura del reticolo
+=====================================================
+
+File:
+
+    lattice.c
+    lattice.h
+
+
+Implementare:
+
+[ ] Creazione reticolo LxL
+
+[ ] Allocazione memoria
+
+[ ] Distruzione memoria
+
+[ ] Cold start:
+
+    tutti spin = +1
+
+
+[ ] Hot start:
+
+    spin casuali +-1
+
+
+[ ] Funzione indice:
+
+    (x,y) -> i
+
+
+[ ] Funzione vicini con condizioni periodiche
+
+
+TEST:
+
+Per L=4 stampare:
+
+    0 1 2 3
+    4 5 6 7
+    ...
+
+
+Controllare:
+
+vicini ai bordi corretti.
+
+
+=====================================================
+FASE 3 - Osservabili
+=====================================================
+
+File:
+
+    observables.c
+    observables.h
+
+
+Implementare:
+
+[ ] Magnetizzazione:
+
+    M = sum_i s_i
+
+
+[ ] Energia:
+
+    E=-J sum_<ij> s_i s_j
+
+
+TEST ANALITICI:
+
+
+Caso 1:
+
+tutti spin +1
+
+Aspettarsi:
+
+    M=N
+
+    E=-2JN
+
+
+(per reticolo quadrato)
+
+
+Caso 2:
+
+configurazione alternata
+
+    + - + -
+    - + - +
+
+Aspettarsi:
+
+    M=0
+
+    E=+2JN
+
+
+=====================================================
+FASE 4 - Algoritmo Wolff
+=====================================================
+
+File:
+
+    wolff.c
+    wolff.h
+
+
+Implementare:
+
+
+[ ] Scelta spin iniziale casuale
+
+
+[ ] Creazione cluster
+
+
+[ ] Probabilità aggiunta:
+
+    p=1-exp(-2 beta J)
+
+
+[ ] Flip cluster
+
+
+TEST:
+
+
+Stampare dimensione cluster:
+
+    cluster_size
+
+
+Controllare:
+
+T alta:
+
+    cluster piccoli
+
+
+T bassa:
+
+    cluster grandi
+
+
+=====================================================
+FASE 5 - Singola simulazione Monte Carlo
+=====================================================
+
+File:
+
+    simulation.c
+    simulation.h
+
+
+Implementare:
+
+
+[ ] Parametri:
+
+    L
+    beta
+    thermalization steps
+    measurements
+    skip
+
+
+[ ] Thermalization loop
+
+
+[ ] Measurement loop
+
+
+Salvare:
+
+    E
+    M
+
+
+TEST:
+
+Fare una simulazione piccola:
+
+
+L=16
+
+beta=0.1
+
+beta=0.5
+
+
+Controllare:
+
+beta piccolo:
+
+    magnetizzazione ~0
+
+
+beta grande:
+
+    |M| vicino a N
+
+
+=====================================================
+FASE 6 - Output dati
+=====================================================
+
+File:
+
+    io.c
+    io.h
+
+
+Implementare:
+
+
+[ ] Scrittura file:
+
+
+data/
+
+    L16_T2.0.dat
+
+
+Formato:
+
+
+T    E    M
+
+
+[ ] Salvare seed RNG
+
+
+[ ] Salvare parametri simulazione
+
+
+=====================================================
+FASE 7 - Studio temperatura critica
+=====================================================
+
+
+Fare scansione:
+
+
+T = 1.5 - 3.5
+
+
+Per ogni T:
+
+
+[ ] energia media
+
+[ ] magnetizzazione
+
+[ ] suscettività
+
+[ ] calore specifico
+
+[ ] Binder cumulant
+
+
+Output:
+
+    results/
+
+
+=====================================================
+FASE 8 - Analisi Python
+=====================================================
+
+
+Script:
+
+
+plots.py
+
+[ ] E(T)
+
+[ ] M(T)
+
+[ ] chi(T)
+
+[ ] C(T)
+
+
+
+binder.py
+
+[ ] Binder cumulant
+
+[ ] Stima Tc
+
+
+scaling.py
+
+[ ] Fit:
+
+    M(Tc) ~ L^-beta/nu
+
+    chi(Tc) ~ L^gamma/nu
+
+
+[ ] Data collapse
+
+
+
+autocorrelation.py
+
+[ ] Calcolo tau
+
+[ ] Confronto critical slowing down
+
+
+
+=====================================================
+FASE 9 - Validazione finale
+=====================================================
+
+
+Confrontare:
+
+
+Tc:
+
+simulazione:
+
+    ~2.269
+
+
+Teoria:
+
+    2.269185...
+
+
+Esponenti:
+
+
+beta:
+
+    0.125
+
+
+gamma:
+
+    1.75
+
+
+nu:
+
+    1
+
+
+
+=====================================================
+FASE 10 - Report finale
+=====================================================
+
+
+Inserire:
+
+
+[ ] Descrizione modello Ising
+
+
+[ ] Algoritmo Wolff
+
+
+[ ] Critical slowing down
+
+
+[ ] Finite size scaling
+
+
+[ ] Grafici
+
+
+[ ] Confronto con teoria
+
+
+[ ] Errori statistici
+
+
+=====================================================
+END
+=====================================================
