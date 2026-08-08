@@ -66,46 +66,6 @@ File:
 
 Implementare:
 
-[ ] Magnetizzazione:
-
-    M = sum_i s_i
-
-
-[ ] Energia:
-
-    E=-J sum_<ij> s_i s_j
-
-
-TEST ANALITICI:
-
-
-Caso 1:
-
-tutti spin +1
-
-Aspettarsi:
-
-    M=N
-
-    E=-2JN
-
-
-(per reticolo quadrato)
-
-
-Caso 2:
-
-configurazione alternata
-
-    + - + -
-    - + - +
-
-Aspettarsi:
-
-    M=0
-
-    E=+2JN
-
 
 =====================================================
 FASE 4 - Algoritmo Wolff

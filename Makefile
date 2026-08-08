@@ -37,7 +37,8 @@ OBJ = $(patsubst src/%.c,$(BUILDDIR)/%.o,$(SRC))
 # Regola principale: link degli oggetti nell'eseguibile
 
 $(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $(TARGET)
+	$(CC) $(OBJ) -o $(TARGET) -lm
+# -lm linka la libreria matematica <math.h>
 
 # Compilazione dei singoli file .c -> .o
 

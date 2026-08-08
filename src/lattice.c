@@ -12,11 +12,6 @@ Lattice* init_lattice(int L, bool hot) {
     lattice->L = L;
 
     if(hot) {
-        uint64_t seed = (uint64_t)time(NULL);
-        uint64_t stream = 54u;
-
-        // pcg_srandom(seed, stream indipendente)
-        pcg32_srandom(seed, stream);
 
         for(int i=0; i<(L*L); i++) {
             // 4294967296.0 = 2^32
