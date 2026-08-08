@@ -1,48 +1,51 @@
 # Compilatore
+
 CC = gcc
 
 # Opzioni compilazione
+
 CFLAGS = -Wall -Wextra -O2 -Iinclude
 
 # -Wall : attiva tutti i warning
 # -Wextra : aggiunge altri controlli
 # -O2 : ottimizzazione del codice
-# -Iinclude : cerca i file .h anche anche nella cartella /include/.
-
+# -Iinclude : cerca i file .h nella cartella /include/
 
 # Nome eseguibile
+
 TARGET = ising
 
-
 # File sorgenti
-SRC = \
-src/main.c \
-src/lattice.c \
-src/pcg_basic.c \
-src/metropolis.c \
-src/wolff.c \
-src/observables.c \
-src/simulation.c \
-src/io.c
 
+SRC = src/main.c \
+      src/lattice.c \
+      src/pcg_basic.c \
+      src/metropolis.c \
+      src/wolff.c \
+      src/observables.c \
+      src/simulation.c \
+      src/io.c
 
-# Conversione .c -> .o
-OBJ = $(SRC:.c=.o)
+# Cartella degli oggetti
 
-# Prende i file in SRC e li sostituisce da .c a .o (automatizza la cosa)
+BUILDDIR = build
 
+# Conversione src/*.c -> build/*.o
 
-# Regola principale
-$(TARGET): $(OBJ) # gcc nome_file.o
+OBJ = $(patsubst src/%.c,$(BUILDDIR)/%.o,$(SRC))
+
+# Regola principale: link degli oggetti nell'eseguibile
+
+$(TARGET): $(OBJ)
 	$(CC) $(OBJ) -o $(TARGET)
-# La seconda riga linka gli eseguibili 
 
+# Compilazione dei singoli file .c -> .o
 
-# Compilazione dei singoli file
-%.o: %.c
+$(BUILDDIR)/%.o: src/%.c
+	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-
 # Pulizia
+
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(BUILDDIR) $(TARGET)
