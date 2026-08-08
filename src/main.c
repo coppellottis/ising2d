@@ -12,37 +12,26 @@
 
 int main(void){
 
-    // initializing rng
-    uint64_t seed = (uint64_t)time(NULL);
-    uint64_t stream = 54u;
-    pcg32_srandom(seed, stream);
+    double beta = 0.35;
 
-    // initializing lattice
-    Lattice* lat;
-    lat = init_lattice(30,true);
-    double beta = 0.45;
-    
-    // computing main observables
-    double m = get_magnetization(lat);
-    double E = get_energy(lat);
+    for(int i=0; i<10; i++) {
+        int ax = 0;
 
-    // output
-    printf("Lattice succesfully initalized!\n");
-    printf("The net magnetization m is: %.6f\n", m);
-    printf("The energy of the system E is: %.6f J\n", E);
+        // initializing rng
+        uint64_t seed = (uint64_t)time(NULL);
+        uint64_t stream = 54u;
+        pcg32_srandom(seed, stream);
 
-    simulation(lat, beta);
+        // initializing lattice
+        Lattice* lat;
+        lat = init_lattice(30,true);
+        simulation(lat, beta, &ax);
+        free_lattice(lat);
 
-    // computing main observables
-    m = get_magnetization(lat);
-    E = get_energy(lat);
+        double ax_rate = (double)ax/((1e4+1e5)*(30*30));
+        printf("Acceptance rate (L=30, beta=%.4f): %.6f\n", beta, ax_rate);
 
-    // output
-    printf("Lattice succesfully updated!\n");
-    printf("The net magnetization m is now: %.6f\n", m);
-    printf("The energy of the system E is now: %.6f J\n", E);
-
-    free_lattice(lat);
-
+        beta = beta + .015;
+    }
     return 0;
 }

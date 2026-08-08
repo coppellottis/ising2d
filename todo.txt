@@ -4,68 +4,6 @@ Development roadmap and debugging checklist
 =====================================================
 
 
-=====================================================
-FASE 2 - Struttura del reticolo
-=====================================================
-
-File:
-
-    lattice.c
-    lattice.h
-
-
-Implementare:
-
-[ ] Creazione reticolo LxL
-
-[ ] Allocazione memoria
-
-[ ] Distruzione memoria
-
-[ ] Cold start:
-
-    tutti spin = +1
-
-
-[ ] Hot start:
-
-    spin casuali +-1
-
-
-[ ] Funzione indice:
-
-    (x,y) -> i
-
-
-[ ] Funzione vicini con condizioni periodiche
-
-
-TEST:
-
-Per L=4 stampare:
-
-    0 1 2 3
-    4 5 6 7
-    ...
-
-
-Controllare:
-
-vicini ai bordi corretti.
-
-
-=====================================================
-FASE 3 - Osservabili
-=====================================================
-
-File:
-
-    observables.c
-    observables.h
-
-
-Implementare:
-
 
 =====================================================
 FASE 4 - Algoritmo Wolff
