@@ -9,6 +9,7 @@
 
 # Eseguibili
 ising2d
+ising
 main
 
 # Directory di build (se la usi)
