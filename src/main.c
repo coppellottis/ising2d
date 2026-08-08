@@ -20,7 +20,7 @@ int main(void){
     // initializing lattice
     Lattice* lat;
     lat = init_lattice(30,true);
-    double beta = 0.40;
+    double beta = 0.45;
     
     // computing main observables
     double m = get_magnetization(lat);

@@ -16,7 +16,7 @@ void pre_prob(double p[], double beta) {
 
 void simulation(Lattice* lattice, double beta) {
     int N_therm = 1e4;
-    int N_measures = 1e5;
+    int N_measures = 1e6;
 
     char filename[256];
 
