@@ -20,7 +20,8 @@ int main(void){
     // initializing lattice
     Lattice* lat;
     lat = init_lattice(30,true);
-
+    double beta = 0.40;
+    
     // computing main observables
     double m = get_magnetization(lat);
     double E = get_energy(lat);
@@ -30,22 +31,18 @@ int main(void){
     printf("The net magnetization m is: %.6f\n", m);
     printf("The energy of the system E is: %.6f J\n", E);
 
-    double beta = .40;
-    double* p = malloc(2*sizeof(*p));
-    pre_prob(p, beta);
+    simulation(lat, beta);
 
-    metropolis_sweep(lat, p);
-
+    // computing main observables
     m = get_magnetization(lat);
     E = get_energy(lat);
 
-    printf("Lattice succesfully sweeped!\n");
+    // output
+    printf("Lattice succesfully updated!\n");
     printf("The net magnetization m is now: %.6f\n", m);
     printf("The energy of the system E is now: %.6f J\n", E);
 
-    // cleaning memory
     free_lattice(lat);
-    free(p);
 
     return 0;
 }

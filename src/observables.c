@@ -8,8 +8,7 @@ double get_magnetization(Lattice* lattice) {
     for(int i=0; i < L*L; i++) {
         M = M+lattice->spins[i];
     }
-    double m = M/(L*L);
-    return m;
+    return M/(L*L);
 }
 
 // In order to avoid double counting, the sum
@@ -26,7 +25,7 @@ double get_energy(Lattice* lattice) {
             E += -lattice->spins[x]*(lattice->spins[right]+lattice->spins[down]);
         }
     }
-    return E;
+    return E/(L*L);
 }
 
 // Returns the local field on site r. PBC implemented.

@@ -3,12 +3,13 @@
 #include "pcg_basic.h"
 #include <time.h>
 #include <math.h>
+#include <stdio.h>
 
 void metropolis_update(Lattice* lattice, double* p) {
     int L = lattice->L;
 
     // One site r is chosen randomly
-    int r = pcg32_boundedrand(L * L);
+    int r = pcg32_boundedrand(L*L);
 
     // Local field for site r
     int S = get_localfield(lattice, r);
@@ -20,7 +21,7 @@ void metropolis_update(Lattice* lattice, double* p) {
         lattice->spins[r] = -lattice->spins[r];
     } else {
         double t = (double)pcg32_random() / 4294967296.0;
-        if(t<= p[(int)(lattice->spins[r]*S)/2]-1) {
+        if(t <= p[(int)(lattice->spins[r]*S)/2-1]) {
             lattice->spins[r] = -lattice->spins[r];
         }
     }
@@ -30,9 +31,8 @@ void metropolis_update(Lattice* lattice, double* p) {
 
 void metropolis_sweep(Lattice* lattice, double* p) {
     int L = lattice->L;
-    for(int i=0; i< L*L; i++) {
+    for(int i=0; i < L*L; i++) {
         metropolis_update(lattice, p);
     }
-
     return;
 }
