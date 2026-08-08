@@ -5,9 +5,9 @@
 
     typedef struct{
         int* spins;
-        int N;
+        int L;
     } Lattice;
 
-    Lattice* init_lattice(int N, bool hot);
+    Lattice* init_lattice(int L, bool hot);
     void free_lattice(Lattice* lattice);
 #endif

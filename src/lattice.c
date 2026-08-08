@@ -1,14 +1,15 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
 #include "lattice.h"
 #include "pcg_basic.h"
 
 // Initializes the lattice with random spin if hot=1,
 // spin=+1 otherwise.
-Lattice* init_lattice(int N, bool hot) {
-    Lattice* lattice;
-    lattice->spins = malloc(N*N*sizeof(int));
-    lattice->N = N;
+Lattice* init_lattice(int L, bool hot) {
+    Lattice* lattice = malloc(sizeof(Lattice));
+    lattice->spins = malloc(L*L*sizeof(int));
+    lattice->L = L;
 
     if(hot) {
         uint64_t seed = (uint64_t)time(NULL);
@@ -17,14 +18,14 @@ Lattice* init_lattice(int N, bool hot) {
         // pcg_srandom(seed, stream indipendente)
         pcg32_srandom(seed, stream);
 
-        for(int i=0; i<N; i++) {
+        for(int i=0; i<(L*L); i++) {
             // 4294967296.0 = 2^32
             double r = (double)pcg32_random() / 4294967296.0;
             if(r>.5) lattice->spins[i] = 1;
             else lattice->spins[i] = -1;
         }
     } else {
-        for(int i=0; i<N; i++) {
+        for(int i=0; i<(L*L); i++) {
             lattice->spins[i] = 1;
         }
     }
@@ -36,5 +37,5 @@ Lattice* init_lattice(int N, bool hot) {
 void free_lattice(Lattice* lattice) {
     free(lattice->spins);
     free (lattice);
-    return 0;
+    return;
 }
