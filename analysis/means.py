@@ -1,17 +1,21 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
+import numpy as np
 
-data = pd.read_csv("results/results_beta_0.3500.csv")
 
-mean_E = data["E_per_site"].mean()
-mean_m = data["m"].mean()
-mean_abs_m = data["m"].abs().mean()
+beta0 = 0.3500
+betas = np.zeros(30)
+abs_m = np.zeros(30)
 
-print(f"<E>/N = {mean_E:.6f}")
-print(f"<m> = {mean_m:.6f}")
-print(f"<|m|> = {mean_abs_m:.6f}")
+for i in range(0,30) :
+    beta = beta0+(i*0.2/30.0);
+    file_name = f"L30_beta{beta:.4f}.csv"
+    data = pd.read_csv("results/" + file_name)
 
-plt.hist(data["m"],bins=50,density=True)
-plt.xlabel(r"$m$")
-plt.ylabel(r"$P(m)$")
+    abs_m[i] = data["m"].abs().mean()
+    betas[i] = beta
+
+plt.scatter(betas, abs_m, marker="s")
+plt.xlabel(r"$\beta$")
+plt.ylabel(r"$\langle |m|\rangle$")
 plt.show()

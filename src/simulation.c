@@ -20,7 +20,7 @@ void simulation(Lattice* lattice, double beta, int* ax) {
 
     char filename[256];
 
-    snprintf(filename, sizeof(filename),"results/results_L30_beta%.4f.csv", beta);
+    snprintf(filename, sizeof(filename),"results/L%d_beta%.4f.csv", lattice->L, beta);
     FILE* file = fopen(filename, "w");
     fprintf(file, "sweep,E_per_site,m\n");
 

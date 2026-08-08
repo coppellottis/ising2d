@@ -14,7 +14,7 @@ int main(void){
 
     double beta = 0.35;
 
-    for(int i=0; i<10; i++) {
+    for(int i=0; i<30; i++) {
         int ax = 0;
 
         // initializing rng
@@ -31,7 +31,7 @@ int main(void){
         double ax_rate = (double)ax/((1e4+1e5)*(30*30));
         printf("Acceptance rate (L=30, beta=%.4f): %.6f\n", beta, ax_rate);
 
-        beta = beta + .015;
+        beta = beta + (0.2/30.0);
     }
     return 0;
 }
