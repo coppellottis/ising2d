@@ -5,6 +5,6 @@
 
     double get_magnetization(Lattice* lattice);
     double get_energy(Lattice* lattice);
-    int get_localfield(Lattice *lattice, int r); // returns the local field on site r
+    int get_localfield(Lattice *lattice, int r); 
 
 #endif
