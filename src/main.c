@@ -13,12 +13,12 @@
 
 int main(void){
 
-    double beta_i = 0.42;
-    double beta_f = 0.46;
-    int n_champ = 20;
+    double beta_i = 0.4200;
+    double beta_f = 0.4600;
+    int n_beta = 25;
 
-    for(int i=0; i<n_champ; i++) {
-        double beta = beta_i + i*((beta_f-beta_i)/n_champ);
+    for(int i=0; i<n_beta; i++) {
+        double beta = beta_i + i*((beta_f-beta_i)/n_beta);
         for(int j=0; j<5; j++) {
 
             int L = (int)pow(2,j)*8;

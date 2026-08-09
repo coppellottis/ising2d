@@ -3,28 +3,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-beta_i = 0.42
-beta_f = 0.46
-n_champ = 20
+beta_i = 0.4200
+beta_f = 0.4600
+delta_beta = beta_f-beta_i
 
-betas = np.zeros((n_champ,5))
-abs_m = np.zeros((n_champ,5))
-m = np.zeros((n_champ,5))
+n_beta = 25 # number of beta for each size L
+n_size = 5 # L=8,16,32,64,128
 
-for i in range(0,n_champ) :
+betas = np.zeros((n_beta,n_size))
+abs_m = np.zeros((n_beta,n_size))
+m = np.zeros((n_beta,n_size))
 
-    beta = beta_i+i*((beta_f-beta_i)/n_champ)
+for i in range(0,n_beta) :
 
-    for j in range(0,5) :
+    beta = beta_i+i*(delta_beta/n_beta)
+
+    for j in range(0,n_size) :
 
         L = 8*pow(2,j) 
 
-        file_name = f"L{L}_beta{beta:.4f}.csv"
+        file_name = f"metropolis_L{L}_beta{beta:.4f}.csv"
         data = pd.read_csv("data/" + file_name)
 
         abs_m[i,j] = data["m"].abs().mean()
         m[i,j] = data["m"].mean()
         betas[i,j] = beta
+
 
 df = pd.DataFrame({
     "beta" : betas[:,0],

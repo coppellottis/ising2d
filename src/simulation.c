@@ -16,11 +16,11 @@ void pre_prob(double p[], double beta) {
 
 void simulation(Lattice* lattice, double beta) {
     int N_therm = 1e4;
-    int N_measures = 1e5;
+    int N_measures = 1e5;    
 
     char filename[256];
 
-    snprintf(filename, sizeof(filename),"data/L%d_beta%.4f.csv", lattice->L, beta);
+    snprintf(filename, sizeof(filename),"data/metropolis_L%d_beta%.4f.csv", lattice->L, beta);
     FILE* file = fopen(filename, "w");
     fprintf(file, "sweep,E_per_site,m\n");
 
