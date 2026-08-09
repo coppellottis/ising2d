@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 
-void metropolis_update(Lattice* lattice, double* p, int* ax) {
+void metropolis_update(Lattice* lattice, double* p) {
     int L = lattice->L;
 
     // One site r is chosen randomly
@@ -20,21 +20,19 @@ void metropolis_update(Lattice* lattice, double* p, int* ax) {
         // opposite direction with respect to s_r:
         // the spin flip is accepted since it lowers the energy
         lattice->spins[r] = -lattice->spins[r];
-        *ax+=1;
     } else {
         double t = (double)pcg32_random() / 4294967296.0;
         if(t <= p[(int)(lattice->spins[r]*S)/2-1]) {
             lattice->spins[r] = -lattice->spins[r];
-            *ax+=1;
         }
     }
 
     return;
 }
 
-void metropolis_sweep(Lattice* lattice, double* p, int* ax) {
+void metropolis_sweep(Lattice* lattice, double* p) {
     int L = lattice->L;
     for(int i=0; i < L*L; i++) {
-        metropolis_update(lattice, p, ax);
+        metropolis_update(lattice, p);
     }
 }

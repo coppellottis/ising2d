@@ -35,6 +35,7 @@ env/
 # Output simulazioni
 # ==========================
 results/
+data/*.csv
 data/raw/
 data/tmp/
 

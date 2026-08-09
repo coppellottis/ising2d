@@ -14,13 +14,13 @@ void pre_prob(double p[], double beta) {
     return;
 }
 
-void simulation(Lattice* lattice, double beta, int* ax) {
+void simulation(Lattice* lattice, double beta) {
     int N_therm = 1e4;
     int N_measures = 1e5;
 
     char filename[256];
 
-    snprintf(filename, sizeof(filename),"results/L%d_beta%.4f.csv", lattice->L, beta);
+    snprintf(filename, sizeof(filename),"data/L%d_beta%.4f.csv", lattice->L, beta);
     FILE* file = fopen(filename, "w");
     fprintf(file, "sweep,E_per_site,m\n");
 
@@ -28,10 +28,10 @@ void simulation(Lattice* lattice, double beta, int* ax) {
     pre_prob(p, beta);
 
     for(int i = 0; i < N_therm; i++) {
-        metropolis_sweep(lattice, p, ax);
+        metropolis_sweep(lattice, p);
     }
     for(int i = 0; i < N_measures; i++) {
-        metropolis_sweep(lattice, p, ax);
+        metropolis_sweep(lattice, p);
         double E = get_energy(lattice);
         double m = get_magnetization(lattice);
         fprintf(file, "%d,%.10f,%.10f\n", i, E, m);

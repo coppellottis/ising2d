@@ -4,6 +4,6 @@
     #include "lattice.h"
     #include <stdbool.h>
 
-    void metropolis_update(Lattice* lattice, double* p, int* ax);
-    void metropolis_sweep(Lattice* lattice, double* p, int* ax);
+    void metropolis_update(Lattice* lattice, double* p);
+    void metropolis_sweep(Lattice* lattice, double* p);
 #endif

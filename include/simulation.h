@@ -4,5 +4,5 @@
     #include <lattice.h>
 
     void pre_prob(double* p, double beta);
-    void simulation(Lattice* lattice, double beta, int* ax);
+    void simulation(Lattice* lattice, double beta);
 #endif
