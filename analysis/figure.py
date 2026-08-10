@@ -51,8 +51,15 @@ ax.errorbar(
     ecolor="tab:purple",
     capsize=3
 )
-#ax.scatter(data.iloc[:, 0],data.iloc[:, 9], marker="v", s=30,facecolors="none",edgecolors="tab:orange",linewidths=1.5,label=r"$L=128$") 
-
+ax.scatter(data.iloc[:, 0],data.iloc[:, 9], marker="v", s=30,facecolors="none",edgecolors="tab:orange",linewidths=1.5,label=r"$L=128$") 
+ax.errorbar(
+    data.iloc[:, 0],
+    data.iloc[:, 9],
+    yerr=data.iloc[:, 10],
+    fmt="none",
+    ecolor="tab:orange",
+    capsize=3
+)
 
 ax.set_xlabel(r"$\beta$")
 ax.set_ylabel(r"$\langle |m| \rangle$")
