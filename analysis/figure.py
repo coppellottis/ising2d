@@ -27,19 +27,35 @@ plt.rcParams.update({
     "legend.fontsize": 18,
 })
 
-data = pd.read_csv("results/metropolis_energy.csv")
+data = pd.read_csv("results/metropolis_m.csv")
 
 fig, ax = plt.subplots(figsize=(12, 8))
 
 ax.scatter(data.iloc[:, 0],data.iloc[:, 1], marker="s", s=30,facecolors="none",edgecolors="tab:blue",linewidths=1.5,label=r"$L=8$") 
-ax.scatter(data.iloc[:, 0],data.iloc[:, 2], marker="^", s=30,facecolors="none",edgecolors="tab:green",linewidths=1.5,label=r"$L=16$") 
-ax.scatter(data.iloc[:, 0],data.iloc[:, 3], marker="d", s=30,facecolors="none",edgecolors="tab:red",linewidths=1.5,label=r"$L=32$") 
-ax.scatter(data.iloc[:, 0],data.iloc[:, 4], marker="o", s=30,facecolors="none",edgecolors="tab:purple",linewidths=1.5,label=r"$L=64$") 
-ax.scatter(data.iloc[:, 0],data.iloc[:, 5], marker="v", s=30,facecolors="none",edgecolors="tab:orange",linewidths=1.5,label=r"$L=128$") 
+ax.errorbar(
+    data.iloc[:, 0],
+    data.iloc[:, 1],
+    yerr=data.iloc[:, 2],
+    fmt="none",
+    ecolor="tab:blue",
+    capsize=3
+)
+#ax.scatter(data.iloc[:, 0],data.iloc[:, 3], marker="^", s=30,facecolors="none",edgecolors="tab:green",linewidths=1.5,label=r"$L=16$") 
+#ax.scatter(data.iloc[:, 0],data.iloc[:, 5], marker="d", s=30,facecolors="none",edgecolors="tab:red",linewidths=1.5,label=r"$L=32$") 
+ax.scatter(data.iloc[:, 0],data.iloc[:, 7], marker="o", s=30,facecolors="none",edgecolors="tab:purple",linewidths=1.5,label=r"$L=64$") 
+ax.errorbar(
+    data.iloc[:, 0],
+    data.iloc[:, 7],
+    yerr=data.iloc[:, 8],
+    fmt="none",
+    ecolor="tab:purple",
+    capsize=3
+)
+#ax.scatter(data.iloc[:, 0],data.iloc[:, 9], marker="v", s=30,facecolors="none",edgecolors="tab:orange",linewidths=1.5,label=r"$L=128$") 
 
 
 ax.set_xlabel(r"$\beta$")
-ax.set_ylabel(r"$\langle \epsilon \rangle$")
+ax.set_ylabel(r"$\langle m \rangle$")
 
 #plt.xticks([.35,.40,.45,.50,.55])
 

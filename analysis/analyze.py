@@ -1,6 +1,6 @@
 import pandas as pd 
 import numpy as np
-from analyze import tau_int
+from functions import error
 
 
 beta_i = 0.4200
@@ -13,6 +13,7 @@ n_size = 5 # L=8,16,32,64,128
 betas = np.zeros((n_beta,n_size))
 abs_m = np.zeros((n_beta,n_size))
 m = np.zeros((n_beta,n_size))
+e_m = np.zeros((n_beta,n_size))
 energy = np.zeros((n_beta, n_size))
 
 for i in range(0,n_beta) :
@@ -28,6 +29,7 @@ for i in range(0,n_beta) :
 
         abs_m[i,j] = data["m"].abs().mean()
         m[i,j] = data["m"].mean()
+        e_m[i,j] = error(data["m"])
         energy[i,j] = data["E_per_site"].mean()
         betas[i,j] = beta
 
@@ -45,10 +47,15 @@ df.to_csv("results/metropolis_abs_m.csv", index=False);
 df2 = pd.DataFrame({
     "beta" : betas[:,0],
     "L8" : m[:,0],
+    "e_L8": e_m[:,0],
     "L16" : m[:,1],
+    "e_L16": e_m[:,1],
     "L32" : m[:,2],
+    "e_L32": e_m[:,2],
     "L64" : m[:,3],
-    "L164" : m[:,4]
+    "e_L64": e_m[:,3],
+    "L128" : m[:,4],
+    "e_L128": e_m[:,4]
 })
 
 df2.to_csv("results/metropolis_m.csv", index=False);
