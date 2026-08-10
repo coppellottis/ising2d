@@ -27,7 +27,7 @@ plt.rcParams.update({
     "legend.fontsize": 18,
 })
 
-data = pd.read_csv("results/metropolis_abs_m.csv")
+data = pd.read_csv("results/metropolis_energy.csv")
 
 fig, ax = plt.subplots(figsize=(12, 8))
 
@@ -39,7 +39,7 @@ ax.scatter(data.iloc[:, 0],data.iloc[:, 5], marker="v", s=30,facecolors="none",e
 
 
 ax.set_xlabel(r"$\beta$")
-ax.set_ylabel(r"$\langle |m| \rangle$")
+ax.set_ylabel(r"$\langle \epsilon \rangle$")
 
 #plt.xticks([.35,.40,.45,.50,.55])
 
@@ -51,7 +51,7 @@ ax.legend(
 fig.tight_layout()
 
 fig.savefig(
-    "results/figure/metropolis_abs_m.pdf",
+    "results/figure/metropolis_energy.pdf",
     bbox_inches="tight"
 )
 
