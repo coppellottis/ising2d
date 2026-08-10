@@ -27,7 +27,7 @@ plt.rcParams.update({
     "legend.fontsize": 18,
 })
 
-data = pd.read_csv("results/metropolis_m.csv")
+data = pd.read_csv("results/metropolis_abs_m.csv")
 
 fig, ax = plt.subplots(figsize=(12, 8))
 
@@ -55,7 +55,7 @@ ax.errorbar(
 
 
 ax.set_xlabel(r"$\beta$")
-ax.set_ylabel(r"$\langle m \rangle$")
+ax.set_ylabel(r"$\langle |m| \rangle$")
 
 #plt.xticks([.35,.40,.45,.50,.55])
 

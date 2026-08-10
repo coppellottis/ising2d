@@ -12,6 +12,7 @@ n_size = 5 # L=8,16,32,64,128
 
 betas = np.zeros((n_beta,n_size))
 abs_m = np.zeros((n_beta,n_size))
+e_abs_m = np.zeros((n_beta,n_size))
 m = np.zeros((n_beta,n_size))
 e_m = np.zeros((n_beta,n_size))
 energy = np.zeros((n_beta, n_size))
@@ -28,6 +29,7 @@ for i in range(0,n_beta) :
         data = pd.read_csv("data/" + file_name)
 
         abs_m[i,j] = data["m"].abs().mean()
+        e_abs_m[i,j] = error(data["m"].abs())
         m[i,j] = data["m"].mean()
         e_m[i,j] = error(data["m"])
         energy[i,j] = data["E_per_site"].mean()
@@ -36,10 +38,15 @@ for i in range(0,n_beta) :
 df = pd.DataFrame({
     "beta" : betas[:,0],
     "L8" : abs_m[:,0],
+    "e_L8": e_abs_m[:,0],
     "L16" : abs_m[:,1],
+    "e_L16": e_abs_m[:,1],
     "L32" : abs_m[:,2],
+    "e_L32": e_abs_m[:,2],
     "L64" : abs_m[:,3],
-    "L164" : abs_m[:,4]
+    "e_L64": e_abs_m[:,3],
+    "L128" : abs_m[:,4],
+    "e_L128": e_abs_m[:,4]
 })
 
 df.to_csv("results/metropolis_abs_m.csv", index=False);
