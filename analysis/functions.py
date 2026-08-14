@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-data = pd.read_csv("data/metropolis_L32_beta0.4200.csv")
-
 rng = np.random.default_rng();
 
 # use this for secondary variables such as U4 Binder's cumulant
