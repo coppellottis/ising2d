@@ -32,7 +32,7 @@ def block_bootstrap(x):
 
     return error
 
-# original definition of integrated autocorrelation time
+# original definition of the integrated autocorrelation time
 def tau_int(x) :
     tau = 0
     N = x.shape[0]
@@ -53,7 +53,7 @@ def tau_int(x) :
             return tau
     return tau
 
-# (faster) computation of int. autocorr. time through fast fourier transform
+# (faster) computation of the int. autocorr. time through fast fourier transform
 def tau_int_fft(x) :
     tau = 0
 

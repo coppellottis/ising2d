@@ -1,4 +1,4 @@
-
+#include <stdlib.h>
 #include "observables.h"
 #include "lattice.h"
 
@@ -30,12 +30,23 @@ double get_energy(Lattice* lattice) {
 
 // Returns the local field on site r. PBC implemented.
 int get_localfield(Lattice* lattice, int r) {
-    int L = lattice->L;
-    int right = (r % L == L - 1) ? r - L + 1 : r + 1;
-    int left  = (r % L == 0) ? r + L - 1 : r - 1;
-    int down  = (r + L) % (L*L);
-    int up = (r - L + L*L) % (L*L);
+    int nn[4];
+    get_nn(lattice, r, nn);
 
-    int S = lattice->spins[right]+lattice->spins[left]+lattice->spins[down]+lattice->spins[up];
+    int S = 0;
+    for(int i = 0; i<4; i++) {
+        S += lattice->spins[nn[i]];
+    }
     return S;
+}
+
+// Returns nearest neighbours
+ void get_nn(Lattice* lattice, int r, int* nn) {
+    int L = lattice->L;
+
+    nn[0] = (r % L == L - 1) ? r - L + 1 : r + 1; // right
+    nn[1]  = (r % L == 0) ? r + L - 1 : r - 1; // left
+    nn[2]  = (r + L) % (L*L); // down
+    nn[3] = (r - L + L*L) % (L*L); // up
+    return;
 }
