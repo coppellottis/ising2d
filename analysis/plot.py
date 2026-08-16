@@ -2,11 +2,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-L_values = [8, 16, 32, 64, 128]
+sim_name = input("Simulation name: ") 
+alg = input("Algorithm (metropolis/wolff): ")
 
-colors = plt.cm.viridis(np.linspace(0, 1, len(L_values)))
+filename = f"data/{sim_name}/metadata.csv"
 
-# Stile generale
+metadata = pd.read_csv(filename)
+
+colors = plt.cm.viridis(np.linspace(0, 1, metadata.shape[0]))
+
+# style
 plt.rcParams.update({
     "font.family": "serif",
     "mathtext.fontset": "cm",
@@ -32,15 +37,21 @@ plt.rcParams.update({
     "legend.fontsize": 18,
 })
 
-data = pd.read_csv("results/metropolis_abs_m.csv")
-
 fig, ax = plt.subplots(figsize=(12, 8))
 
-for i, L in enumerate(L_values) :
+for i in range(0,metadata.shape[0]) :
+    L = metadata["L"][i]
+    beta_i = metadata["beta_i"][i]
+    beta_f = metadata["beta_f"][i]
+    n_beta = metadata["n_beta"][i]
+    n_measures = metadata["n_measures"][i]
+
+    data = pd.read_csv(f"results/{sim_name}/L{L}_abs_m.csv")
+
     color = colors[i]
     ax.scatter(
-        data.iloc[:, 0],
-        data.iloc[:, (2*i+1)], 
+        data["beta"],
+        data["abs_m"], 
         marker="o", 
         color=color,
         s=30,
@@ -48,9 +59,9 @@ for i, L in enumerate(L_values) :
         label=rf"$L={L}$"
     ) 
     ax.errorbar(
-        data.iloc[:, 0],
-        data.iloc[:, (2*i+1)],
-        yerr=data.iloc[:, 2*(i+1)],
+        data["beta"],
+        data["abs_m"], 
+        yerr=data["err_abs_m"],
         fmt="none",
         color=color,
         capsize=3
@@ -73,7 +84,7 @@ ax.legend(
 fig.tight_layout()
 
 fig.savefig(
-    "results/figure/metropolis_abs_m.pdf",
+    f"results/figure/{sim_name}_abs_m.pdf",
     bbox_inches="tight"
 )
 

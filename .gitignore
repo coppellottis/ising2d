@@ -38,6 +38,7 @@ results/
 data/*.csv
 data/raw/
 data/tmp/
+*.csv
 
 # ==========================
 # Grafici generati

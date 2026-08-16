@@ -4,6 +4,10 @@ Development roadmap and debugging checklist
 =====================================================
 
 
+Barre d'errore su ciascun τ_int (jackknife a blocchi) e poi fit pesato (χ²), da cui viene fuori anche l'incertezza su z stesso.
+Controlla il χ²/dof del fit pesato: se è ≫1, la legge di potenza pura non basta e serve un termine di correzione a L piccoli (o togliere L=8, che è quello più esposto a effetti di taglia finita, e rifittare solo su L=16..128 per vedere se z si sposta verso 2.15-2.17).
+Verifica se hai usato lo stesso β per tutti gli L (es. β_c(∞)=0.4406868) o il β_c(L)-dependente per ciascuno — la prescrizione standard "τ ~ L^z a β_c fissato" richiede coerenza su questo punto tra tutti i punti del fit.
+
 
 =====================================================
 FASE 4 - Algoritmo Wolff
