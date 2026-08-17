@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 sim_name = input("Simulation name: ") 
 alg = input("Algorithm (metropolis/wolff): ")
@@ -10,6 +12,7 @@ metadata = pd.read_csv(filename)
 
 beta_c = 0.5*np.log(1+np.sqrt(2))
 tau = np.zeros(metadata.shape[0])
+err_tau = np.zeros(metadata.shape[0])
 
 for i in range(0,metadata.shape[0]) :
     L = metadata["L"][i]
@@ -19,6 +22,7 @@ for i in range(0,metadata.shape[0]) :
     idx = (data["beta"]-beta_c).abs().idxmin() # finds the beta closest to beta_c
 
     tau[i] = data["tau_abs_m"][idx]
+    err_tau[i] = data["err_tau_abs_m"][idx]
 
 # style
 plt.rcParams.update({
@@ -50,17 +54,88 @@ plt.rcParams.update({
 fig, ax = plt.subplots(figsize=(12, 8))
 x = np.log(metadata["L"])
 y = np.log(tau)
+yerr = err_tau/tau
 
-ax.scatter(x,y)
+ax.errorbar(
+    x, y,
+    yerr=yerr,
+    fmt='o',
+    markersize=5,
+    capsize=3,
+    label='Data',
+    color='black'
+)
 
 ax.set_xlabel(r"$\log L$")
-ax.set_ylabel(r"$\log \tau_{|m|}$")
+ax.set_ylabel(r"$\log \tau_{int}^{|m|}$")
 
-p = np.polyfit(x, y, 1)
+def linear(x, a, z):
+    return a + z*x
 
-z = p[0]
-logA = p[1]
+popt, pcov = curve_fit(
+    linear,
+    x,
+    y,
+    sigma=yerr,
+    absolute_sigma=True
+)
 
-print("z =", z)
+a, z = popt
+a_err, z_err = np.sqrt(np.diag(pcov)) ## see doc
+
+xfit = np.linspace(x.min(), x.max(), 200)
+yfit = linear(xfit,a,z)
+
+var_fit = (
+    pcov[0, 0]
+    + xfit**2 * pcov[1, 1]
+    + 2*xfit * pcov[0, 1]
+)
+sigma_fit = np.sqrt(var_fit)
+
+ax.plot(
+    xfit,
+    yfit,
+    label=fr'Fit: $z^\prime={z:.3f}\pm{z_err:.3f}$'
+)
+
+ax.fill_between(
+    xfit,
+    yfit - sigma_fit,
+    yfit + sigma_fit,
+    alpha=0.2
+)
+
+## subplot
+axins = inset_axes(
+    ax,
+    width="38%",
+    height="38%",
+    loc="lower right",
+    borderpad=2
+)
+
+axins.errorbar(
+    metadata["L"], tau,
+    yerr=err_tau,
+    fmt='o',
+    markersize=5,
+    capsize=3,
+    color='black'
+)
+
+# eventualmente tick più piccoli
+axins.tick_params(labelsize=12)
+axins.set_xlabel('L',size=16)
+axins.set_ylabel(r"$\tau_{int}^{|m|}$",size=16)
+
+ax.legend()
+fig.tight_layout()
+
+fig.savefig(
+    f"results/figure/{sim_name}_dynamic_z.pdf",
+    bbox_inches="tight"
+)
 
 plt.show()
+

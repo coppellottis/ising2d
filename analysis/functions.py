@@ -34,7 +34,7 @@ def block_bootstrap(x):
 
 # original definition of the integrated autocorrelation time
 def tau_int(x) :
-    tau = 0
+    tau = 0.5
     N = x.shape[0]
 
     mean = x.mean()
@@ -55,7 +55,7 @@ def tau_int(x) :
 
 # (faster) computation of the int. autocorr. time through fast fourier transform
 def tau_int_fft(x) :
-    tau = 0
+    tau = 0.5
 
     x = np.asarray(x)
     N = len(x)
@@ -78,7 +78,8 @@ def tau_int_fft(x) :
             print(f"tau:{tau}")
             return tau
 
-    print(f"No tau")
+    print("Warning: finestra non convergente, uso tau a k=N//2 (probabile sottostima)")
+    return tau
 
 def error(x) :
     x = np.asarray(x)
@@ -88,5 +89,24 @@ def error(x) :
     if tau is None:
         return 0
     else:
-        error = np.sqrt(np.var(x)*(1+2*tau)/N)
+        error = np.sqrt(np.var(x)*2*tau/N)
         return error
+
+def get_tau(x, tau_func, n_blocks=20):
+    x = np.asarray(x)
+    N = len(x)
+
+    tau = tau_func(x)
+
+    block_size = N // n_blocks
+    x = x[:block_size * n_blocks]   # discard the tail
+    blocks = np.array_split(x, n_blocks)
+
+    tau_k = np.empty(n_blocks)
+    for k in range(n_blocks):
+        reduced = np.concatenate([blocks[i] for i in range(n_blocks) if i != k])
+        tau_k[k] = tau_func(reduced)
+
+    tau_mean = tau_k.mean()
+    tau_err = np.sqrt((n_blocks - 1) / n_blocks * np.sum((tau_k - tau_mean) ** 2))
+    return tau, tau_err
