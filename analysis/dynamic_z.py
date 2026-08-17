@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy.stats import chi2
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 sim_name = input("Simulation name: ") 
@@ -54,7 +55,7 @@ plt.rcParams.update({
 fig, ax = plt.subplots(figsize=(12, 8))
 x = np.log(metadata["L"])
 y = np.log(tau)
-yerr = err_tau/tau
+yerr = (err_tau/tau)
 
 ax.errorbar(
     x, y,
@@ -93,10 +94,15 @@ var_fit = (
 )
 sigma_fit = np.sqrt(var_fit)
 
+y2 = linear(x,a,z)
+chi2_value = np.sum(((y - y2) / yerr)**2)
+dof = len(y)-2
+chi2_red = chi2_value / dof
+
 ax.plot(
     xfit,
     yfit,
-    label=fr'Fit: $z^\prime={z:.3f}\pm{z_err:.3f}$'
+    label=fr'Fit: $z^\prime={z:.2f}\pm{z_err:.2f}$, $\chi_r^2={chi2_red:.2f}$ (dof=$3$)'
 )
 
 ax.fill_between(
