@@ -44,14 +44,19 @@ for i in range(0,metadata.shape[0]):
     L = metadata["L"][i]
     data = pd.read_csv(f"results/{sim_name}/L{L}_tau.csv")
     tau = data["tau_abs_m"]
+    err_tau = data["err_tau_abs_m"]
     beta = data["beta"]
 
     x = (beta-beta_c)*(L**(1/nu))
     y = tau/(L**z)
+    yerr = err_tau/(L**z)
 
-    ax.scatter(
-        x,
-        y,
+    ax.errorbar(
+        x, y,
+        yerr=yerr,
+        fmt='o',
+        markersize=5,
+        capsize=3,
         label=f"{L}"
     )
 
