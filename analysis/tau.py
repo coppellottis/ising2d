@@ -19,17 +19,20 @@ for i in range(0,metadata.shape[0]) :
 
     df = pd.DataFrame()
 
-    for i in range(0,n_beta) :
+    for j in range(0,n_beta) :
 
-        beta = beta_i + i*(beta_f - beta_i) / (n_beta-1)
-
+        if n_beta == 1:
+            beta = beta_i
+        else:
+            beta = beta_i + i*(beta_f - beta_i) / (n_beta-1)
+            
         file_name = f"{sim_name}/{alg}_L{L}_beta{beta:.4f}.csv"
         data = pd.read_csv("data/" + file_name)
 
-        df.loc[i, "beta"] = beta
+        df.loc[j, "beta"] = beta
         tau_abs_m, err_tau_abs_m = get_tau(data["m"].abs(),tau_int_fft)
-        df.loc[i, "tau_abs_m"] = tau_abs_m   
-        df.loc[i, "err_tau_abs_m"] = err_tau_abs_m
+        df.loc[j, "tau_abs_m"] = tau_abs_m   
+        df.loc[j, "err_tau_abs_m"] = err_tau_abs_m
         
         os.makedirs(f"results/{sim_name}",exist_ok=True)
         df.to_csv(f"results/{sim_name}/L{L}_tau.csv",index=False)

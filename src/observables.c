@@ -40,7 +40,7 @@ int get_localfield(Lattice* lattice, int r) {
     return S;
 }
 
-// Returns nearest neighbours
+// Returns nearest neighbours (PBC)
  void get_nn(Lattice* lattice, int r, int* nn) {
     int L = lattice->L;
 

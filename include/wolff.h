@@ -3,7 +3,7 @@
 
     #include "lattice.h"
 
-    void wolff_update(Lattice* lattice);
-    void wolff_sweep(Lattice* lattice);
+    int wolff_update(Lattice* lattice, double p_add);
+    double wolff_sweep(Lattice* lattice, double p_add, double sweep_frac);
 
 #endif

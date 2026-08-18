@@ -61,7 +61,7 @@ for i in range(0,metadata.shape[0]):
     )
 
 ax.set_xlabel(r"$(\beta-\beta_c)L^{1/\nu}$")
-ax.set_ylabel(r"$\tau_{int}^{|m|}/L^z$")
+ax.set_ylabel(r"$\tau_{int}^{|m|}/L^{z^\prime}$")
 fig.legend(loc="upper left")
 
 fig.tight_layout()

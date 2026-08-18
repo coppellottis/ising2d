@@ -6,7 +6,6 @@ from scipy.stats import chi2
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 sim_name = input("Simulation name: ") 
-alg = input("Algorithm (metropolis/wolff): ")
 
 filename = f"data/{sim_name}/metadata.csv"
 metadata = pd.read_csv(filename)
@@ -102,7 +101,7 @@ chi2_red = chi2_value / dof
 ax.plot(
     xfit,
     yfit,
-    label=fr'Fit: $z^\prime={z:.2f}\pm{z_err:.2f}$, $\chi_r^2={chi2_red:.2f}$ (dof=$3$)'
+    label=fr'Fit: $z^\prime={z:.2f}\pm{z_err:.2f}$, $\chi_r^2={chi2_red:.2f}$ (dof=${dof}$)'
 )
 
 ax.fill_between(
