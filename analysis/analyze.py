@@ -5,7 +5,7 @@ from functions import error
 from concurrent.futures import ProcessPoolExecutor
 
 def analyze(args) :
-    L, beta_i, beta_f, n_beta, n_measures = args
+    sim_name, alg, L, beta_i, beta_f, n_beta = args
 
     df = pd.DataFrame() # m
 
@@ -22,11 +22,13 @@ def analyze(args) :
         df.loc[i, "beta"] = beta
         df.loc[i, "abs_m"] = data["m"].abs().mean()
         df.loc[i, "err_abs_m"] = error(data["m"].abs())
+        df.loc[i, "chi"] = np.var(data["m"])*beta*(L**2)
+        df.loc[i, "e"] = data["E_per_site"].mean()
+        df.loc[i, "err_e"] = error(data["E_per_site"])
+        df.loc[i, "c"] = np.var(data["E_per_site"])*(L)**2 ## should be C(v) instead of c(v)...
         
-        os.makedirs(f"results/{sim_name}",exist_ok=True)
-        df.to_csv(f"results/{sim_name}/L{L}_abs_m.csv",index=False)
-
-
+        df.to_csv(f"results/{sim_name}/L{L}.csv",index=False)
+    return
 
 if __name__ == "__main__":
 
@@ -45,10 +47,11 @@ if __name__ == "__main__":
         n_beta = metadata["n_beta"][i]
         n_measures = metadata["n_measures"][i]
 
-        jobs.append((L, beta_i, beta_f, n_beta, n_measures))
+        jobs.append((sim_name, alg, L, beta_i, beta_f, n_beta))
 
         n_processes = 4
 
+        os.makedirs(f"results/{sim_name}",exist_ok=True)
         with ProcessPoolExecutor(max_workers=n_processes) as executor:
             executor.map(analyze, jobs)
     

@@ -48,7 +48,7 @@ def tau_int(x) :
 
         tau += 1/d*rho_k
 
-        if(k>5*tau) :
+        if(k>10*tau) :
             return tau
         
     print("Warning: Window did not converge; using tau at k=N//2 (likely underestimated).")

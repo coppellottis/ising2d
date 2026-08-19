@@ -21,10 +21,10 @@ for i in range(0,metadata.shape[0]) :
 
     for j in range(0,n_beta) :
 
-        if n_beta == 1:
+        if n_beta == 1 : 
             beta = beta_i
         else:
-            beta = beta_i + i*(beta_f - beta_i) / (n_beta-1)
+            beta = beta_i + j*(beta_f - beta_i) / (n_beta-1)
             
         file_name = f"{sim_name}/{alg}_L{L}_beta{beta:.4f}.csv"
         data = pd.read_csv("data/" + file_name)
