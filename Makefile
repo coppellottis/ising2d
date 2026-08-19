@@ -4,7 +4,7 @@ CC = gcc
 
 # Opzioni compilazione
 
-CFLAGS = -Wall -Wextra -O2 -Iinclude
+CFLAGS = -Wall -Wextra -O2 -Iinclude -fopenmp
 
 # -Wall : attiva tutti i warning
 # -Wextra : aggiunge altri controlli
@@ -37,7 +37,7 @@ OBJ = $(patsubst src/%.c,$(BUILDDIR)/%.o,$(SRC))
 # Regola principale: link degli oggetti nell'eseguibile
 
 $(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $(TARGET) -lm
+	$(CC) $(OBJ) -o $(TARGET) -lm -fopenmp
 # -lm linka la libreria matematica <math.h>
 
 # Compilazione dei singoli file .c -> .o

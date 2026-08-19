@@ -1,77 +1,74 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 from functions import get_tau, tau_int_fft
 import matplotlib.pyplot as plt
-
-# style
-plt.rcParams.update({
-    "font.family": "serif",
-    "mathtext.fontset": "cm",
-    "font.size": 18,
-
-    "axes.labelsize": 20,
-    "xtick.labelsize": 18,
-    "ytick.labelsize": 18,
-
-    "axes.linewidth": 1.0,
-
-    "xtick.direction": "in",
-    "ytick.direction": "in",
-
-    "xtick.top": True,
-    "ytick.right": True,
-
-    "xtick.major.size": 6,
-    "ytick.major.size": 6,
-    "xtick.minor.size": 3,
-    "ytick.minor.size": 3,
-
-    "legend.fontsize": 18,
-})
+from concurrent.futures import ProcessPoolExecutor
+import os
 
 
-fig, ax = plt.subplots(figsize=(12, 8))
+def compute_errors(args):
 
-sim_name = input("Simulation name: ") 
-alg = input("Algorithm (metropolis/wolff): ")
+    sim_name, alg, L, beta_i, beta_f, n_beta, kk = args
 
-filename = f"data/{sim_name}/metadata.csv"
-metadata = pd.read_csv(filename)
+    beta_c = 0.5 * np.log(1 + np.sqrt(2))
 
-k_i = int(input("Initial block size for binning (min 2): "))
-k_f = int(input("Final block size for binning: "))
-n_k = 20
-kk = np.linspace(k_i,k_f,n_k).astype(int)
+    beta = np.linspace(beta_i, beta_f, n_beta)
+    beta = beta[np.argmin(np.abs(beta - beta_c))]
 
-err = np.zeros(n_k)
+    file_name = f"data/{sim_name}/{alg}_L{L}_beta{beta:.4f}.csv"
 
-beta_c = 0.5*np.log(1+np.sqrt(2))
+    data = pd.read_csv(file_name)
 
-for i in range(0,metadata.shape[0]) :
-    L = metadata["L"][i]
-    beta_i = metadata["beta_i"][i]
-    beta_f = metadata["beta_f"][i]
-    n_beta = metadata["n_beta"][i]
+    os.makedirs(f"results/{sim_name}/blocking",exist_ok=True)
+    path = f"results/{sim_name}/blocking/L{L}_tau_err.csv"
 
-    beta = np.linspace(beta_i, beta_f, n_beta) 
-    beta = beta[np.argmin(np.abs(beta-beta_c))]
+    for k, block_size in enumerate(kk):
+        df = pd.DataFrame()            
+        tau, tau_err = get_tau(data["m"].abs(),tau_int_fft,block_size)
+        df.loc[k, "err_tau"] = tau_err
+        df.loc[k, "k"] = block_size
+        print(tau)
 
-    file_name = f"{sim_name}/{alg}_L{L}_beta{beta:.4f}.csv"
+    df.to_csv(path,mode="a", header=not os.path.exists(path), index=False)
 
-    data = pd.read_csv("data/" + file_name)
+    return
 
-    for k in range(0,n_k):
-        tau, tau_err = get_tau(data["m"].abs(), tau_int_fft, kk[k])
-        err[k] = tau_err
 
-    ax.scatter(
-        kk, err,
-        label = f"L = {L}"
-    )
+if __name__ == "__main__":
+    sim_name = input("Simulation name: ")
+    alg = input("Algorithm (metropolis/wolff): ")
 
-ax.set_xlabel(r"$k$")
-ax.set_xlabel(r"$\sigma_\tau$")
+    metadata = pd.read_csv(f"data/{sim_name}/metadata.csv")
 
-fig.legend()
+    k_i = int(input("Initial block size for binning (min 2): "))
+    k_f = int(input("Final block size for binning: "))
+    n_k = int(input("Number of windows: "))
 
-plt.show()
+    kk = np.linspace(k_i, k_f, n_k).astype(int)
+
+    jobs = []
+
+    for i in range(metadata.shape[0]):
+
+        L = metadata["L"][i]
+        beta_i = metadata["beta_i"][i]
+        beta_f = metadata["beta_f"][i]
+        n_beta = metadata["n_beta"][i]
+
+        jobs.append(
+            (
+                sim_name,
+                alg,
+                L,
+                beta_i,
+                beta_f,
+                n_beta,
+                kk
+            )
+        )
+
+    # number of core (RAM 8 Gi+2 Gi swap)
+    n_processes = 2
+
+    with ProcessPoolExecutor(max_workers=n_processes) as executor:
+        executor.map(compute_errors, jobs)

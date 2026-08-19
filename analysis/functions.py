@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-rng = np.random.default_rng();
+rng = np.random.default_rng()
 
 # use this for secondary variables such as U4 Binder's cumulant
 # returns error for different block dimension k
@@ -47,10 +47,11 @@ def tau_int(x) :
             rho_k += (x[i]-mean)*(x[i+k]-mean)
 
         tau += 1/d*rho_k
-        print(f"tau_int (k={k}): {tau}")
 
         if(k>5*tau) :
             return tau
+        
+    print("Warning: Window did not converge; using tau at k=N//2 (likely underestimated).")
     return tau
 
 # (faster) computation of the int. autocorr. time through fast fourier transform
@@ -75,10 +76,9 @@ def tau_int_fft(x) :
     for k in range(1,N//2):
         tau += rho[k]
         if (k>5*tau) :
-            print(f"tau:{tau}")
             return tau
 
-    print("Warning: finestra non convergente, uso tau a k=N//2 (probabile sottostima)")
+    print("Warning: Window did not converge; using tau at k=N//2 (likely underestimated).")
     return tau
 
 def error(x) :

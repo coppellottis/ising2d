@@ -2,18 +2,16 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
 #include <math.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <omp.h>
 #include "pcg_basic.h"
 #include "lattice.h"
 #include "observables.h"
 #include "simulation.h"
 #include "metropolis.h"
-
-
 
 int main(void){
 
@@ -104,6 +102,9 @@ int main(void){
             printf("WARNING: the number of measurements must be > 0.\n");
         }
 
+        // SIMULATION
+
+        #pragma omp parallel for
         for(int i = 0; i < n_beta; i++) {
             double beta;
         
@@ -113,18 +114,23 @@ int main(void){
             printf("\nL = %d, beta = %.4f, measurements = %d, algorithm = %s\n", L, beta, n_measures, alg);
 
             // initializing rng
-            uint64_t seed = (uint64_t)time(NULL);
-            uint64_t stream = 54u;
-            pcg32_srandom(seed, stream);
+            pcg32_random_t rng;
+
+            uint64_t seed = 123456789u + i;
+            uint64_t stream = 54u + i;
+
+            pcg32_srandom_r(&rng, seed, stream);
 
             // initializing lattice
             Lattice* lat;
             lat = init_lattice(L,true);
-            simulation(lat, beta, alg, n_measures, sim_name);
+            simulation(lat, beta, alg, n_measures, sim_name, &rng);
             free_lattice(lat);
         }
         
-        char metadata_path[256];
+        // METADATA 
+
+        char metadata_path[512];
         snprintf(metadata_path, sizeof(metadata_path), "data/%s/metadata.csv", sim_name);
         FILE *metadata = fopen(metadata_path, "a");
 
