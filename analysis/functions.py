@@ -110,3 +110,23 @@ def get_tau(x, tau_func, n_blocks=20):
     tau_mean = tau_k.mean()
     tau_err = np.sqrt((n_blocks - 1) / n_blocks * np.sum((tau_k - tau_mean) ** 2))
     return tau, tau_err
+
+def format_error(value, error, sig=1):
+    """
+    Format as value(error), e.g.
+    2.1734 ± 0.0512 -> 2.17(5)
+    2.1734 ± 0.0051 -> 2.173(5)
+    """
+    if error == 0:
+        return f"{value}"
+
+    exponent = int(np.floor(np.log10(abs(error))))
+    decimals = max(0, -exponent + (sig - 1))
+
+    value_r = round(value, decimals)
+    error_r = round(error, decimals)
+
+    # errore espresso come intero nelle ultime cifre
+    error_digits = int(round(error_r * 10**decimals))
+
+    return f"{value_r:.{decimals}f}({error_digits})"

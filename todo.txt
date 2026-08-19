@@ -289,6 +289,26 @@ Inserire:
 
 
 ########## x RELAZIONE
+
+Ecco l'elenco completo, organizzato per argomento. Includo sia i riferimenti già citati per Metropolis (per completezza, ora con dati bibliografici precisi) sia — soprattutto — quelli specifici per Wolff che spiegano il χ²=9.47 che hai appena trovato.
+
+Dinamica locale (Metropolis) — per il confronto con z'=2.17
+
+M.P. Nightingale, H.W.J. Blöte, "Dynamic Exponent of the Two-Dimensional Ising Model and Monte Carlo Computation of the Subdominant Eigenvalue of the Stochastic Matrix", Phys. Rev. Lett. 76, 4548 (1996). z=2.1665(12), il valore di riferimento più preciso, ottenuto non da un fit di τ vs L ma dal calcolo diretto dell'autovalore subdominante.
+M.-D. Lacasse, J. Viñals, M. Grant, "Dynamic Monte Carlo renormalization-group method", Phys. Rev. B 47, 5646 (1993) [arXiv:cond-mat/9206004]. z=2.13±0.01 — questo è il paper di cui avevamo discusso prima (quello che avevo erroneamente attribuito a "Ito").
+Dinamica Wolff — questi spiegano il fit di oggi
+
+U. Wolff, "Collective Monte Carlo updating for spin systems", Phys. Rev. Lett. 62, 361 (1989). Il paper originale dell'algoritmo. Nota interessante: Wolff stesso, su reticoli fino a L=128, riporta tempi di autocorrelazione di 1-2 "passi per spin" senza segno di critical slowing down — ordine di grandezza compatibile con il tuo inset (τ~0.9-1.2).
+C.F. Baillie, P.D. Coddington, "Empirical relations between static and dynamic exponents for Ising model cluster algorithms", Phys. Rev. Lett. 68, 962 (1992). Questo è il riferimento chiave per il tuo caso. Propongono che per Wolff l'autocorrelazione dell'energia scali come il calore specifico, cioè z_int,E = α/ν. Per il 2D Ising α=0 esatto (divergenza logaritmica del calore specifico) — quindi la congettura predice direttamente una crescita logaritmica di τ con L, non una power-law. È l'argomento teorico più diretto a supporto dell'ipotesi che ti avevo proposto per spiegare la curvatura nei tuoi dati.
+J.P. Kent-Dobias, J.P. Sethna, "Cluster representations and the Wolff algorithm in arbitrary external fields", Phys. Rev. E 98, 063306 (2018) [arXiv:1805.04019]. Riportano z≈0.23(5) per il 2D Ising misurato dal decadimento a campo piccolo, esplicitamente definendo queste stime "imprecise" — utile per mostrare quanto sia difficile pinpointare questo esponente anche in lavori recenti.
+Se vuoi approfondire il dibattito power-law vs log
+
+D. Ivaneyko, J. Ilnytskyi, B. Berche, Yu. Holovatch, "Local and cluster critical dynamics of the 3d random-site Ising model", [arXiv:cond-mat/0603521] — non è il tuo caso (3D, disordine), ma discute esplicitamente la congettura di Coddington-Baillie e come/quando si applica, utile come modello di come strutturare la discussione in relazione.
+Se cerchi qualcosa di più moderno e metodologicamente affine (fit diretto di τ vs L su più taglie, con attenzione alla forma funzionale), guarda i lavori del gruppo di N.G. Fytas sulla dinamica critica di modelli reticolari (es. Vatansever, Barkema, Fytas, "Dynamical critical behavior of the two-dimensional three-state Potts model", Phys. Rev. E 110, 014135 (2024)) — non è Ising/Wolff specificamente, ma la metodologia di analisi (fit, correzioni di scala, discussione della forma funzionale) è dello stesso tipo di quella che stai facendo tu, e potrebbe darti spunti su come presentare il caso log vs power-law.
+Per la relazione
+
+Il pezzo forte da citare esplicitamente accanto al tuo χ²=9.47 è Baillie-Coddington (1992): ti dà la giustificazione teorica a priori (non a posteriori) per aspettarti α/ν=0, quindi una crescita logaritmica — è molto più convincente scrivere "il rigetto della power-law è coerente con la congettura di Baillie-Coddington, che per il 2D Ising predice z=α/ν=0" piuttosto che limitarsi a dire "il fit di potenza non funziona".
+#######################
 Risultato: z' = 2.17 ± 0.03 (Metropolis locale, osservabile ⟨|m|⟩, L=20–160).
 Confronto con letteratura: compatibile entro 1σ con le stime più accreditate per Model A in 2D.
 Nota metodologica: i dataset a L più piccoli (≤128) mostravano una leggera sottostima sistematica di z, verosimilmente dovuta a correzioni di scala non trascurabili a quelle taglie — risolta estendendo il range di L.
