@@ -6,6 +6,8 @@ from scipy.optimize import brentq, curve_fit
 from concurrent.futures import ProcessPoolExecutor
 from functions import format_error
 
+### I've assumed FSS for beta_x to be beta_x(L,sL)=beta_c+A(s)L^(-omega-nu), with omega = 2, nu = 21
+
 def find_crossing(args) :
     sim_name, L1, L2 = args
 

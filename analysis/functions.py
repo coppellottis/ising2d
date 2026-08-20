@@ -10,7 +10,7 @@ def binder_cumulant(x) :
     return 1-(x**4).mean()/(3*((x**2).mean())**2)
 
 # block bootstrap error
-# use this for secondary variables such as U4 Binder's cumulant
+# use this for secondary variables such as U4 Binder cumulant
 # returns error for different block dimension k
 def blckbstr_error(x, f, k = 20):
     k = max(1, int(k))
