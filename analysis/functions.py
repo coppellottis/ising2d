@@ -2,33 +2,33 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 rng = np.random.default_rng()
 
+# Binder's cumulant
+def binder_cumulant(x) :
+    return 1-(x**4).mean()/(3*((x**2).mean())**2)
+
+# block bootstrap error
 # use this for secondary variables such as U4 Binder's cumulant
 # returns error for different block dimension k
-def block_bootstrap(x):
-    error = np.zeros(15) # k=1,2,4,8...,2**15 
+def blckbstr_error(x, f, k = 20):
+    k = max(1, int(k))
+
     N = x.shape[0]
+    n = N // k
 
-    for j in range(15):
-        k = 2**j
-        n = N // k
+    # pre-computation of block
+    blocks = np.array([x[i*k:(i+1)*k] for i in range(n)])
 
-        # pre-computation of block means
-        block_means = np.array([
-            x[i*k:(i+1)*k].mean()
-            for i in range(n)
-        ])
+    R = 1000
+    means = np.zeros(R)
 
-        R = 1000
-        means = np.zeros(R)
+    for r in range(R):
+        indices = rng.integers(0, n, size=n)
+        means[r] = f(blocks[indices].reshape(-1))
 
-        for r in range(R):
-            indices = rng.integers(0, n, size=n)
-            means[r] = block_means[indices].mean()
-
-        error[j] = means.std(ddof=1)
-        print(f"sigma_k = {error[j]} per k = {k}")
+    error = means.std(ddof=1)
 
     return error
 
@@ -51,13 +51,12 @@ def tau_int(x) :
         if(k>10*tau) :
             return tau
         
-    print("Warning: Window did not converge; using tau at k=N//2 (likely underestimated).")
-    return tau
+    print("Warning: Window did not converge; returned None.")
+    return None
 
 # (faster) computation of the int. autocorr. time through fast fourier transform
-def tau_int_fft(x) :
-    tau = 0.5
-
+def tau_int_fft(x, c = 5, min_window = 4) :
+    
     x = np.asarray(x)
     N = len(x)
 
@@ -69,17 +68,21 @@ def tau_int_fft(x) :
     power = f * np.conjugate(f)
 
     acov = np.fft.ifft(power).real[:N]
-    acov /= np.arange(N, 0, -1) # keeps only the first 0,... N-1 elements (on nnft)
+    acov /= N # keeps only the first 0,... N-1 elements (on nnft)
+    # biased convention used; acov/= N works better than un-biased acov/= N-lag... (biased+more stable for large k)
 
     rho = acov / acov[0]
 
-    for k in range(1,N//2):
-        tau += rho[k]
-        if (k>5*tau) :
-            return tau
+    taus = np.concatenate(([0.5], 0.5+np.cumsum(rho[1:])))
+    idx = np.arange(0, len(taus)) # lag k
 
-    print("Warning: Window did not converge; using tau at k=N//2 (likely underestimated).")
-    return tau
+    valid = (idx >= min_window) & (idx < N // 2) & (idx > c * taus)
+
+    if not np.any(valid):
+        print("Warning: Window did not converge; returned None.")
+        return None
+    else :
+        return max(taus[np.argmax(valid)], 0.5)
 
 def error(x) :
     x = np.asarray(x)
@@ -87,11 +90,12 @@ def error(x) :
 
     tau = tau_int_fft(x)
     if tau is None:
-        return 0
+        return np.nan, tau
     else:
         error = np.sqrt(np.var(x)*2*tau/N)
-        return error
+        return error, tau
 
+# tau value + block jackknife error
 def get_tau(x, tau_func, n_blocks=20):
     x = np.asarray(x)
     N = len(x)
@@ -111,6 +115,7 @@ def get_tau(x, tau_func, n_blocks=20):
     tau_err = np.sqrt((n_blocks - 1) / n_blocks * np.sum((tau_k - tau_mean) ** 2))
     return tau, tau_err
 
+# output format
 def format_error(value, error, sig=1):
     """
     Format as value(error), e.g.

@@ -69,6 +69,9 @@ plt.rcParams.update({
 fig, ax = plt.subplots(figsize=(12, 8))
 fig2, ax2 = plt.subplots(figsize=(12, 8))
 fig3, ax3 = plt.subplots(figsize=(12, 8))
+fig4, ax4 = plt.subplots(figsize=(12, 8))
+fig5, ax5 = plt.subplots(figsize=(12, 8))
+fig6, ax6 = plt.subplots(figsize=(12, 8))
 beta_min = 1
 beta_max = 0
 
@@ -81,27 +84,13 @@ for i in range(0,metadata.shape[0]) :
 
     data = pd.read_csv(f"results/{sim_name}/L{L}.csv")
 
-    ax.errorbar(
-        data["beta"],
-        data["abs_m"], 
-        yerr=data["err_abs_m"],
-        fmt="o",
-        capsize=3,
-        markerfacecolor='none',
-        label=rf"$L={L}$"
-    )
+    ax.errorbar(data["beta"], data["abs_m"], yerr=data["err_abs_m"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
+    ax2.errorbar(data["beta"], data["e"], yerr=data["err_e"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
+    ax3.errorbar(data["beta"], data["C"], yerr=data["err_C"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
+    ax4.errorbar(data["beta"], data["chi"], yerr=data["err_chi"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
+    ax5.errorbar(data["beta"], data["chi1"]/(1e2), yerr=data["err_chi1"]/(1e2), fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
+    ax6.errorbar(data["beta"], data["U"], yerr=data["err_U"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
 
-    ax2.errorbar(
-        data["beta"],
-        data["e"], 
-        yerr=data["err_e"],
-        fmt="o",
-        capsize=3,
-        markerfacecolor='none',
-        label=rf"$L={L}$"
-    )
-
-    ax3.plot(data["beta"],data["c"], marker='o', linestyle='none', markerfacecolor='none', label=rf"$L={L}$")
 
     beta_min = data["beta"].min() if data["beta"].min() < beta_min else beta_min
     beta_max = data["beta"].max() if data["beta"].max() > beta_max else beta_max
@@ -117,8 +106,8 @@ x2 = np.linspace(beta_min,beta_max,1000)
 y2 = energy_theory(x2)
 ax2.plot(x2,y2,ls="--",c="black",label=r"$L\to\infty$ (Onsager)")
 
-y3 = specific_heat_theory(x2)
-ax3.plot(x2,y3,ls="--",c="black",label=r"$L\to\infty$ (Onsager)")
+#y3 = specific_heat_theory(x2)
+#ax3.plot(x2,y3,ls="--",c="black",label=r"$L\to\infty$ (Onsager)")
 
 ##### 
 ax.set_xlabel(r"$\beta$")
@@ -130,16 +119,34 @@ ax2.set_ylabel(r"$\epsilon$")
 ax3.set_xlabel(r"$\beta$")
 ax3.set_ylabel(r"$C$")
 
+ax4.set_xlabel(r"$\beta$")
+ax4.set_ylabel(r"$\chi$")
+
+ax5.set_xlabel(r"$\beta$")
+ax5.set_ylabel(r"$\chi^\prime/10^2$")
+
+ax6.set_xlabel(r"$\beta$")
+ax6.set_ylabel(r"$U$")
+
 ax.legend(loc="best")
 ax2.legend(loc="best")
 ax3.legend(loc="best")
+ax4.legend(loc="best")
+ax5.legend(loc="best")
+ax6.legend(loc="best")
 
 fig.tight_layout()
 fig2.tight_layout()
 fig3.tight_layout()
+fig4.tight_layout()
+fig5.tight_layout()
+fig6.tight_layout()
 
 fig.savefig(f"results/figure/{sim_name}_abs_m.pdf", bbox_inches="tight")
 fig2.savefig(f"results/figure/{sim_name}_e.pdf", bbox_inches="tight")
 fig3.savefig(f"results/figure/{sim_name}_C.pdf", bbox_inches="tight")
+fig4.savefig(f"results/figure/{sim_name}_chi.pdf", bbox_inches="tight")
+fig5.savefig(f"results/figure/{sim_name}_chi1.pdf", bbox_inches="tight")
+fig6.savefig(f"results/figure/{sim_name}_U.pdf", bbox_inches="tight")
 
 plt.show()
