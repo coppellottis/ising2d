@@ -72,9 +72,6 @@ if __name__ == "__main__" :
     })
 
     x, y, yerr = np.array(crossings).T # traspose
-    x = x[1:]
-    y = y[1:]
-    yerr = yerr[1:]
 
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.errorbar(x**(-3), y, yerr=yerr, fmt='o', markersize=5, capsize=3, label='Data', color='black')

@@ -13,6 +13,12 @@
 #include "simulation.h"
 #include "metropolis.h"
 
+typedef struct {
+    int i;
+    int j;
+} Job;
+
+
 int main(void){
 
     int n_L;
@@ -54,6 +60,7 @@ int main(void){
     double* beta_f = calloc(n_L, sizeof(double));
     int* n_beta = calloc(n_L, sizeof(int));
     int* n_measures = calloc(n_L, sizeof(int));
+    int n_jobs = 0;
 
     for(int i=0; i<n_L; i++) {
 
@@ -62,7 +69,7 @@ int main(void){
             printf("L = ");
             scanf("%d", L+i);
 
-            if(L>0) break;
+            if(L[i]>0) break;
             printf("WARNING: L must be > 0.\n");
         }
 
@@ -89,6 +96,7 @@ int main(void){
                 printf("Number of beta values = ");
                 scanf("%d", n_beta+i);
             }
+            n_jobs += n_beta[i];
 
             if(n_beta[i] > 0) break;
             printf("WARNING: the number of beta values must be > 0.\n");
@@ -105,53 +113,52 @@ int main(void){
         }
     }
 
-    for(int i = 0; i < n_L; i++) {
+    char metadata_path[512];
+    snprintf(metadata_path, sizeof(metadata_path), "data/%s/metadata.csv", sim_name);
+    FILE *metadata = fopen(metadata_path, "w");
 
-        // SIMULATION
+    fprintf(metadata,"algorithm,L,beta_i,beta_f,n_beta,n_measures\n");
 
-        #pragma omp parallel for
-        for(int j = 0; j < n_beta[i]; j++) {
-            double beta;
-        
-            if(n_beta[i] == 1) beta = beta_i[i];
-            else beta = beta_i[i] + j*(beta_f[i] - beta_i[i]) / (n_beta[i]-1);
-
-            printf("\nL = %d, beta = %.4f, measurements = %d, algorithm = %s\n", L[i], beta, n_measures[i], alg);
-
-            // initializing rng
-            pcg32_random_t rng;
-
-            uint64_t seed = 123456789u + i;
-            uint64_t stream = 54u + i;
-
-            pcg32_srandom_r(&rng, seed, stream);
-
-            // initializing lattice
-            Lattice* lat;
-            lat = init_lattice(L[i],true);
-            simulation(lat, beta, alg, n_measures[i], sim_name, &rng);
-            free_lattice(lat);
-        }
-        
-        // METADATA 
-
-        char metadata_path[512];
-        snprintf(metadata_path, sizeof(metadata_path), "data/%s/metadata.csv", sim_name);
-        FILE *metadata = fopen(metadata_path, "a");
-
-        if (metadata == NULL) {
-            perror("WARNING: an error occurred while opening metadata.csv");
-            exit(EXIT_FAILURE);
-        }
-
-        fseek(metadata, 0, SEEK_END);
-
-        if (ftell(metadata) == 0) {
-            fprintf(metadata,"algorithm,L,beta_i,beta_f,n_beta,n_measures\n");
-        }
-
+    for (int i = 0; i < n_L; i++) {
         fprintf(metadata,"%s,%d,%f,%f,%d,%d\n",alg,L[i],beta_i[i],beta_f[i],n_beta[i],n_measures[i]);
-        fclose(metadata);
+    }
+
+    fclose(metadata);
+
+    Job *jobs = malloc(n_jobs * sizeof(Job));
+
+    int k = 0;
+    for (int i = 0; i < n_L; i++)
+        for (int j = 0; j < n_beta[i]; j++)
+            jobs[k++] = (Job){i, j};
+
+    // SIMULATION
+    #pragma omp parallel for
+    for(int k = 0; k < n_jobs; k++) {
+
+        int i = jobs[k].i;
+        int j = jobs[k].j;
+
+        double beta;
+        
+        if(n_beta[i] == 1) beta = beta_i[i];
+        else beta = beta_i[i] + j*(beta_f[i] - beta_i[i]) / (n_beta[i]-1);
+
+        printf("\nL = %d, beta = %.4f, measurements = %d, algorithm = %s\n", L[i], beta, n_measures[i], alg);
+
+        // initializing rng
+        pcg32_random_t rng;
+
+        uint64_t seed = 123456789u + i+j*1000;
+        uint64_t stream = 54u + i+j*1000;
+
+        pcg32_srandom_r(&rng, seed, stream);
+
+        // initializing lattice
+        Lattice* lat;
+        lat = init_lattice(L[i],true);
+        simulation(lat, beta, alg, n_measures[i], sim_name, &rng);
+        free_lattice(lat);
     }
 
     free(L);

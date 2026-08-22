@@ -8,3 +8,4 @@ alg = input("Algorithm (metropolis/wolff): ")
 filename = f"data/{sim_name}/metadata.csv"
 
 metadata = pd.read_csv(filename)
+
