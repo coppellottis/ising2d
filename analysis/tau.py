@@ -33,6 +33,9 @@ for i in range(0,metadata.shape[0]) :
         tau_abs_m, err_tau_abs_m = get_tau(data["m"].abs(),tau_int_fft)
         df.loc[j, "tau_abs_m"] = tau_abs_m   
         df.loc[j, "err_tau_abs_m"] = err_tau_abs_m
+        tau_e, err_tau_e = get_tau(data["E_per_site"], tau_int_fft)
+        df.loc[j, "tau_E"] = tau_e
+        df.loc[j, "err_tau_E"] = err_tau_e
         
         os.makedirs(f"results/{sim_name}",exist_ok=True)
         df.to_csv(f"results/{sim_name}/L{L}_tau.csv",index=False)

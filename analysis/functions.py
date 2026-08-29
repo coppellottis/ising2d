@@ -115,6 +115,17 @@ def get_tau(x, tau_func, n_blocks=20):
     tau_err = np.sqrt((n_blocks - 1) / n_blocks * np.sum((tau_k - tau_mean) ** 2))
     return tau, tau_err
 
+def build_histogram(energies, e_min, e_max, de=4) :
+    # note that the sup limit is exclued while using np.arange 
+    # (reason why +4 must be added to np.max(energies))
+    energies = np.asarray(energies, dtype=float)
+    E_bins = np.arange(e_min, e_max + de, de)
+    H = np.zeros(len(E_bins), dtype=int)
+    idx = np.round((energies - e_min) / 4).astype(int)
+    H = np.bincount(idx, minlenght=len(E_bins))[:len(E_bins)]
+
+    return E_bins, H
+
 # output format
 def format_error(value, error, sig=1):
     """
