@@ -1,7 +1,13 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import ellipk, ellipe
+
+# NOTE (bugfix): results/figure/ is gitignored and doesn't exist on a fresh
+# clone; fig.savefig() below used to fail with FileNotFoundError the first
+# time this script ran.
+os.makedirs("results/figure", exist_ok=True)
 
 def energy_theory(beta):
     k = 2 * np.sinh(2 * beta) / np.cosh(2 * beta)**2
@@ -66,6 +72,9 @@ plt.rcParams.update({
     "legend.fontsize": 18,
 })
 
+
+colors = plt.cm.Blues(np.linspace(.2,1,metadata.shape[0]))
+
 fig, ax = plt.subplots(figsize=(12, 8))
 fig2, ax2 = plt.subplots(figsize=(12, 8))
 fig3, ax3 = plt.subplots(figsize=(12, 8))
@@ -84,12 +93,12 @@ for i in range(0,metadata.shape[0]) :
 
     data = pd.read_csv(f"results/{sim_name}/L{L}.csv")
 
-    ax.errorbar(data["beta"], data["abs_m"], yerr=data["err_abs_m"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
-    ax2.errorbar(data["beta"], data["e"], yerr=data["err_e"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
-    ax3.errorbar(data["beta"], data["C"], yerr=data["err_C"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
-    ax4.errorbar(data["beta"], data["chi"], yerr=data["err_chi"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
-    ax5.errorbar(data["beta"], data["chi1"]/(1e2), yerr=data["err_chi1"]/(1e2), fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
-    ax6.errorbar(data["beta"], data["U"], yerr=data["err_U"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
+    ax.errorbar(data["beta"], data["abs_m"], yerr=data["err_abs_m"], fmt="o", capsize=3, color=colors[i], markerfacecolor='none', label=rf"$L={L}$")
+    ax2.errorbar(data["beta"], data["e"], yerr=data["err_e"], fmt="o", capsize=3, color=colors[i], markerfacecolor='none', label=rf"$L={L}$")
+    ax3.errorbar(data["beta"], data["C"], yerr=data["err_C"], fmt="o", capsize=3, color=colors[i], markerfacecolor='none', label=rf"$L={L}$")
+    ax4.errorbar(data["beta"], data["chi"]/1e2, yerr=data["err_chi"]/1e2, fmt="o", capsize=3, color=colors[i], markerfacecolor='none', label=rf"$L={L}$")
+    ax5.errorbar(data["beta"], data["chi1"]/(1e2), yerr=data["err_chi1"]/(1e2), fmt="o", capsize=3, color=colors[i], markerfacecolor='none', label=rf"$L={L}$")
+    ax6.errorbar(data["beta"], data["U"], yerr=data["err_U"], fmt="o", capsize=3, color=colors[i], markerfacecolor='none', label=rf"$L={L}$")
 
 
     beta_min = data["beta"].min() if data["beta"].min() < beta_min else beta_min
@@ -120,7 +129,7 @@ ax3.set_xlabel(r"$\beta$")
 ax3.set_ylabel(r"$C$")
 
 ax4.set_xlabel(r"$\beta$")
-ax4.set_ylabel(r"$\chi$")
+ax4.set_ylabel(r"$\chi/10^2$")
 
 ax5.set_xlabel(r"$\beta$")
 ax5.set_ylabel(r"$\chi^\prime/10^2$")

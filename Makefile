@@ -24,7 +24,8 @@ SRC = src/main.c \
       src/wolff.c \
       src/observables.c \
       src/simulation.c \
-      src/io.c
+      src/io.c \
+      src/progress.c
 
 # Cartella degli oggetti
 
@@ -46,7 +47,17 @@ $(BUILDDIR)/%.o: src/%.c
 	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Target opzionale con ottimizzazioni piu' aggressive, specifiche per la
+# macchina su cui si compila (-march=native non e' portabile: il binario
+# risultante va eseguito sulla stessa macchina/microarchitettura). Usare
+# "make fast" invece di "make" quando si vuole spremere le simulazioni piu'
+# lunghe e non serve distribuire l'eseguibile altrove.
+fast: CFLAGS = -Wall -Wextra -O3 -march=native -flto -Iinclude -fopenmp
+fast: clean $(TARGET)
+
 # Pulizia
 
 clean:
 	rm -rf $(BUILDDIR) $(TARGET)
+
+.PHONY: clean fast

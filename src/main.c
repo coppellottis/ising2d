@@ -12,6 +12,8 @@
 #include "observables.h"
 #include "simulation.h"
 #include "metropolis.h"
+#include "io.h"
+#include "progress.h"
 
 typedef struct {
     int i;
@@ -31,6 +33,16 @@ int main(void){
     char folder_path[512];
 
     snprintf(folder_path, sizeof(folder_path), "data/%s", sim_name);
+
+    // "data/" itself is gitignored (it's the output directory), so a fresh
+    // clone won't have it yet. Create it first (ignoring the "already
+    // exists" case) so a first run doesn't fail with an unhelpful
+    // "No such file or directory" before ever getting to the real target
+    // folder.
+    if (mkdir("data", 0777) != 0 && errno != EEXIST) {
+        perror("WARNING: could not create data/ folder.");
+        exit(EXIT_FAILURE);
+    }
 
     if (mkdir(folder_path, 0777) != 0) {
         perror("WARNING: could not create folder.");
@@ -113,17 +125,7 @@ int main(void){
         }
     }
 
-    char metadata_path[512];
-    snprintf(metadata_path, sizeof(metadata_path), "data/%s/metadata.csv", sim_name);
-    FILE *metadata = fopen(metadata_path, "w");
-
-    fprintf(metadata,"algorithm,L,beta_i,beta_f,n_beta,n_measures\n");
-
-    for (int i = 0; i < n_L; i++) {
-        fprintf(metadata,"%s,%d,%f,%f,%d,%d\n",alg,L[i],beta_i[i],beta_f[i],n_beta[i],n_measures[i]);
-    }
-
-    fclose(metadata);
+    write_metadata(sim_name, alg, L, beta_i, beta_f, n_beta, n_measures, n_L);
 
     Job *jobs = malloc(n_jobs * sizeof(Job));
 
@@ -132,35 +134,57 @@ int main(void){
         for (int j = 0; j < n_beta[i]; j++)
             jobs[k++] = (Job){i, j};
 
+    // Cap the thread count to the number of jobs (no point reserving idle
+    // progress-bar rows for threads that will never run anything), and
+    // reserve exactly that many bar rows before entering the parallel
+    // region -- progress_init() must run single-threaded, and no other
+    // printf should land inside that reserved screen area afterwards or
+    // it'll scroll the bars out of sync with the cursor math.
+    int nt = omp_get_max_threads();
+    if (nt > n_jobs) nt = n_jobs;
+    if (nt < 1) nt = 1;
+
+    printf("\nRunning %d job%s on %d thread%s...\n", n_jobs, n_jobs == 1 ? "" : "s", nt, nt == 1 ? "" : "s");
+    progress_init(nt, n_jobs);
+
     // SIMULATION
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(nt)
     for(int k = 0; k < n_jobs; k++) {
 
         int i = jobs[k].i;
         int j = jobs[k].j;
 
         double beta;
-        
+
         if(n_beta[i] == 1) beta = beta_i[i];
         else beta = beta_i[i] + j*(beta_f[i] - beta_i[i]) / (n_beta[i]-1);
-
-        printf("\nL = %d, beta = %.4f, measurements = %d, algorithm = %s\n", L[i], beta, n_measures[i], alg);
 
         // initializing rng
         pcg32_random_t rng;
 
-        uint64_t seed = 123456789u + i+j*1000;
-        uint64_t stream = 54u + i+j*1000;
+        // Bugfix: seeding used to be "123456789u + i+j*1000" / "54u + i+j*1000".
+        // For any scan with n_beta[i] >= ~1000 (or enough lattice sizes),
+        // different (i,j) pairs could map to the same i+j*1000 and silently
+        // reuse the exact same seed AND stream for two different jobs. The
+        // flat job index k is unique across the whole batch by construction
+        // (see the "jobs" array above), so deriving seed/stream from it can't
+        // collide regardless of how many L's or beta's are scanned.
+        uint64_t seed = 123456789u + (uint64_t)k;
+        uint64_t stream = 987654321u + (uint64_t)k;
 
         pcg32_srandom_r(&rng, seed, stream);
 
         // initializing lattice
         Lattice* lat;
-        lat = init_lattice(L[i],true);
+        lat = init_lattice(L[i], true, &rng);
         simulation(lat, beta, alg, n_measures[i], sim_name, &rng);
         free_lattice(lat);
     }
 
+    progress_finish();
+    printf("Done: %d job%s completed.\n", n_jobs, n_jobs == 1 ? "" : "s");
+
+    free(jobs);
     free(L);
     free(beta_i);
     free(beta_f);

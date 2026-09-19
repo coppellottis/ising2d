@@ -1,8 +1,14 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-sim_name = input("Simulation name: ") 
+# NOTE (bugfix): results/figure/ is gitignored and doesn't exist on a fresh
+# clone; fig.savefig() below used to fail with FileNotFoundError the first
+# time this script ran.
+os.makedirs("results/figure", exist_ok=True)
+
+sim_name = input("Simulation name: ")
 alg = input("Algorithm (metropolis/wolff): ")
 z = float(input("Dynamic exponent z': "))
 nu = 1
