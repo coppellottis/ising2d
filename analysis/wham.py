@@ -13,8 +13,9 @@ from functions import build_histogram
 # clone; fig.savefig() below used to fail with FileNotFoundError the first
 # time this script ran.
 os.makedirs("results/figure", exist_ok=True)
+df = pd.DataFrame()
 
-def solve_multiple_histogram(betas, n_eff, E_bins, H, tol=1e-10, max_iter=20000, position=1) :
+def solve_multiple_histogram(betas, n_eff, E_bins, H, tau, tol=1e-10, max_iter=20000, position=1) :
     # K = # of betas, M = # of bins
     K, M = H.shape
 
@@ -70,10 +71,6 @@ def specific_heat(beta, E_bins, log_gE, N):
 
     return cv
 
-def chi(beta, M, E_bins, log_gE, N):
-
-    return
-
 plt.rcParams.update({
     "font.family": "serif",
     "mathtext.fontset": "cm",
@@ -107,6 +104,7 @@ alg = input("Algorithm (metropolis/wolff): ")
 filename = f"data/{sim_name}/metadata.csv"
 
 metadata = pd.read_csv(filename)
+colors = plt.cm.Blues(np.linspace(.3,1,metadata.shape[0]))
 
 beta_max = []
 cv_max = []
@@ -156,20 +154,27 @@ for i in tqdm(range(0,metadata.shape[0]), desc="WHAM per L", position=0, dynamic
 
     n_eff = np.asarray(n_measures / (2*tau_E_smooth), dtype=float)
 
-    log_gE, f, n_iter =  solve_multiple_histogram(betas, np.mean(n_eff), E_bins, H_all)
+    log_gE, f, n_iter =  solve_multiple_histogram(betas, np.mean(n_eff), E_bins, H_all, tau_E_smooth)
     print(f"n_iter: {n_iter}")
 
     x = np.linspace(beta_i, beta_f, 1000)
     y = [specific_heat(beta, E_bins, log_gE, N) for beta in x]
 
-    line = ax.plot(x,y, color="black")[0]
+    line = ax.plot(x,y, color=colors[i])[0]
 
     data2 = pd.read_csv(f"results/{sim_name}/L{L}.csv")
-    ax.errorbar(data2["beta"], data2["C"], yerr=data2["err_C"], fmt="o", capsize=3, markerfacecolor='none', label=rf"$L={L}$")
+    ax.errorbar(data2["beta"], data2["C"], yerr=data2["err_C"], fmt="o", capsize=3, color=colors[i], markerfacecolor='none', label=rf"$L={L}$")
 
     result = minimize_scalar(lambda beta: -specific_heat(beta, E_bins, log_gE, N),bounds=(beta_i, beta_f),method='bounded')
     beta_max.append(result.x)
     cv_max.append(-result.fun)
+
+    df1 = pd.DataFrame({
+        "E_bins": E_bins,
+        "log_gE": log_gE
+    })
+
+    df1.to_csv(f"results/{sim_name}/wham_results.csv", index=False)
 
 line.set_label('WHAM')
 

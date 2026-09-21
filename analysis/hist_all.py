@@ -111,12 +111,12 @@ def plot_density_map(Z, bins, xlabel, out_path):
     # observable axis lets both axes be centers, matching Z's shape
     # directly with shading="nearest".
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
-    pcm = ax.pcolormesh(bin_centers, betas, Z, shading="nearest", cmap="plasma")
+    pcm = ax.pcolormesh(bin_centers, betas, Z, shading="nearest", cmap="Blues")
     cbar = fig.colorbar(pcm, ax=ax)
     cbar.set_label(r"$P_\beta$")
 
     if betas.min() <= beta_c <= betas.max():
-        ax.axhline(beta_c, color="cyan", ls="--", lw=1.8, label=r"$\beta_c$ (Onsager)")
+        ax.axhline(beta_c, color="black", ls="--", lw=1.8, label=r"$\beta_c$ (Onsager)")
         ax.legend(loc="upper right")
 
     ax.set_xlabel(xlabel)
