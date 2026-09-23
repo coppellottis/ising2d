@@ -1,11 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.special import logsumexp
-from scipy.interpolate import UnivariateSpline
-from scipy.optimize import minimize_scalar
-from scipy.optimize import curve_fit
 from tqdm import tqdm
 from functions import tau_int_fft
 
@@ -28,7 +24,7 @@ for i in tqdm(range(0,metadata.shape[0]), desc="WHAM per L", position=0, dynamic
     beta_f = metadata["beta_f"][i]
     n_beta = metadata["n_beta"][i]
     n_measures = metadata["n_measures"][i]
-
+    
     I_all = []
     tau = []
     N_eff = []
@@ -43,7 +39,8 @@ for i in tqdm(range(0,metadata.shape[0]), desc="WHAM per L", position=0, dynamic
         I_beta = np.bincount(np.round((energies-(-E_max))/4).astype(int), minlength=len(bins))[:len(bins)]
         I_beta = I_beta.astype(float)
 
-        _, tau_E = tau_int_fft(data["E_per_site"])
+        tau_E, _ = tau_int_fft(data["E_per_site"])
+        #tau_E = L**0.3
 
         # correzioni correlazione
         I_beta /= 2*tau_E
@@ -107,14 +104,24 @@ for i in tqdm(range(0,metadata.shape[0]), desc="WHAM per L", position=0, dynamic
         "log_gE" : log_gE.copy()
     }
 
+#max_bins = max(results.values(), key=lambda x: len(x["bins"]))["bins"]
 
-max_bins = max(results.values(), key=lambda x: len(x["bins"]))["bins"]
+#df = pd.DataFrame({"E": max_bins})
+#for L, result in results.items():
+#    df[str(L)] = -np.inf
+#    indices = np.searchsorted(max_bins, result["bins"])
+#    df.loc[indices,str(L)] = result["log_gE"]
 
-df = pd.DataFrame({"E": max_bins})
-for L, result in results.items():
-    df[str(L)] = -np.inf
-    indices = np.searchsorted(max_bins, result["bins"])
-    df.loc[indices,str(L)] = result["log_gE"]
+#df.to_csv(f"results/{sim_name}/wham_results.csv", index=False)
 
-df.insert(1,"bins", bins)
-df.to_csv(f"results/{sim_name}/wham_results.csv", index=False)
+series_by_L = {
+    str(L): pd.Series(result["log_gE"], index=result["bins"])
+    for L, result in results.items()
+}
+
+df = pd.concat(series_by_L, axis=1).sort_index()
+df = df.fillna(-np.inf)
+df.index.name = "E"
+df = df.reset_index()
+
+df.to_csv(f"results/{sim_name}/wham_results_n.csv", index=False)
