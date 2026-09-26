@@ -114,7 +114,7 @@ def sokal_window(taus, N, c=5, min_window=4):
 # tau.py do -- you can actually tell *which* run needs more statistics or
 # better thermalization instead of an unattributed "Warning: Window did
 # not converge" printed somewhere in a wall of output.
-def tau_int_fft(x, c = 5, min_window = 4, label = None) :
+def tau_int_fft(x, c = 6, min_window = 4, label = None) :
 
     x = np.asarray(x)
     N = len(x)

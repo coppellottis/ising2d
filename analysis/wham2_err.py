@@ -20,7 +20,7 @@ os.makedirs("results/figure", exist_ok=True)
 results = {}
 
 ## Parametri bootstrap
-N_IT = 200
+N_IT = 20
 BLOCK_SIZE_MULT = 100 # c*tau
 
 def block_bootstrap_sampler(data, block_size):

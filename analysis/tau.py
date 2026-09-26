@@ -11,8 +11,6 @@ filename = f"data/{sim_name}/metadata.csv"
 
 metadata = pd.read_csv(filename)
 
-colors = plt.cm.Blues(np.linspace(0,1,len(metadata.shape[0])))
-
 for i in tqdm(range(0,metadata.shape[0]), desc="Lattice sizes", position=0, dynamic_ncols=True) :
     L = metadata["L"][i]
     beta_i = metadata["beta_i"][i]

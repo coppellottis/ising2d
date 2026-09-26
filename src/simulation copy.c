@@ -121,17 +121,8 @@ void simulation(Lattice* lattice, double beta, const char* alg, const int n_meas
 
         double therm_t0 = progress_now();
         int therm_step = N_therm/100 > 0 ? N_therm/100 : 1;
-        // Termalizzazione: stessa durata di prima (in sweep equivalenti),
-        // ma contiamo cluster e spin girati per stimare <|C|>.
-        int N = lattice->L * lattice->L;
-        long long therm_clusters = 0, therm_flipped = 0;
         for(int i = 0; i< N_therm; i++) {
-            while(sweep_frac < 1.0) {
-                int s = wolff_update(lattice, p_add, buf, rng);
-                therm_clusters++; therm_flipped += s;
-                sweep_frac += (double)s/N;
-            }
-            sweep_frac -= 1.0;
+            sweep_frac = wolff_sweep(lattice, p_add, sweep_frac, buf, rng);
             if(i % therm_step == 0 || i == N_therm-1) {
                 progress_update(row, label, "therm", i+1, N_therm, progress_now()-therm_t0);
             }
@@ -139,14 +130,8 @@ void simulation(Lattice* lattice, double beta, const char* alg, const int n_meas
 
         double meas_t0 = progress_now();
         int meas_step = n_measures/100 > 0 ? n_measures/100 : 1;
-        // Numero di cluster fra due misure FISSATO prima delle misure
-        // (~1 sweep in media). Non deve dipendere dallo stato corrente,
-        // altrimenti gli istanti di misura sono tempi di arresto
-        // correlati con la configurazione e le misure non sono Boltzmann.
-        int n_cl = (int)lround((double)N * therm_clusters / therm_flipped);
-        if(n_cl < 1) n_cl = 1;
         for(int i = 0; i< n_measures; i++) {
-            for(int c = 0; c < n_cl; c++) wolff_update(lattice, p_add, buf, rng);
+            sweep_frac = wolff_sweep(lattice, p_add, sweep_frac, buf, rng);
 
             double E = get_energy(lattice);
             double m = get_magnetization(lattice);

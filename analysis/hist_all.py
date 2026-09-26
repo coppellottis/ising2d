@@ -123,7 +123,7 @@ def plot_density_map(Z, bins, xlabel, out_path):
     ax.set_ylabel(r"$\beta$")
     ax.text(0.03, 0.97, rf"$L={L}$", transform=ax.transAxes, ha="left", va="top",
             fontsize=18, color="white",
-            bbox=dict(facecolor="black", alpha=0.35, edgecolor="none", pad=3))
+            bbox=dict(facecolor="white", alpha=0.35, edgecolor="none", pad=3))
 
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")

@@ -13,8 +13,8 @@ def specific_heat(beta, E_bins, log_gE, N):
     log_w = log_gE - beta * E_bins
     f = logsumexp(log_w)
 
-    w = np.exp(log_w - f) 
- 
+    w = np.exp(log_w - f)
+
     e_mean = np.sum(w * E_bins)
     e2_mean = np.sum(w * E_bins**2)
     var_E = e2_mean - e_mean ** 2
@@ -22,7 +22,88 @@ def specific_heat(beta, E_bins, log_gE, N):
 
     return cv
 
-sim_name = input("Simulation name: ") 
+# beta_pc(L) = beta_c + x0 * L^(-1/nu): forma standard della finite-size
+# scaling per la posizione del massimo di una grandezza pseudo-critica
+# (qui C_V). p0 = [0.4407, -0.2, 1.0] parte da beta_c teorico noto
+# (0.5*ln(1+sqrt2)) e da un esponente nu=1 (valore Onsager per il 2D Ising).
+def beta_max_fit(L, beta_c, x0, nu):
+    return beta_c + x0 * np.asarray(L, dtype=float)**(-1.0/nu)
+
+# Stampa il fit beta_pc(L)=beta_c+x0*L^-1/nu su un dato sottoinsieme di
+# taglie, col chi^2 ridotto. NOTA: qui non abbiamo una stima dell'errore
+# su beta_max(L) (beta_max viene da un argmax deterministico sulla curva
+# WHAM, non da un resampling) -- curve_fit viene quindi chiamato senza
+# sigma, e il residuo sum(residuals**2)/dof NON è un chi^2 calibrato
+# (non ha le unità giuste, non tende a 1 per un buon fit): è solo un
+# indicatore relativo, utile per confrontare i vari tagli L_min tra loro,
+# non per un test di bontà del fit in senso stretto. Per un chi^2/dof
+# vero serve err_beta_max(L) dal bootstrap (wham_bootstrap.py o lo script
+# di bootstrap con multiprocessing).
+def fit_beta_pc(L_fit, beta_fit, p0=(0.4407, -0.2, 1.0)):
+    popt, pcov = curve_fit(beta_max_fit, L_fit, beta_fit, p0=p0, maxfev=20000)
+    perr = np.sqrt(np.diag(pcov))
+
+    dof = len(L_fit) - len(popt)
+    residuals = np.asarray(beta_fit) - beta_max_fit(L_fit, *popt)
+    chi2 = np.sum(residuals**2)
+    chi2_red = chi2 / dof if dof > 0 else np.nan
+
+    return popt, perr, dof, chi2_red
+
+# Come format_error, ma non esplode se l'errore non è finito: con dof=0
+# (fit a 3 punti su 3 parametri, curva passa esattamente per i dati) o con
+# una covarianza singolare, curve_fit restituisce pcov=inf/nan invece di
+# sollevare un'eccezione (solo un OptimizeWarning) -- format_error fa
+# np.log10(errore), che con inf/nan crasha con OverflowError. In quel
+# caso non c'è un vero errore da riportare: si stampa solo la stima.
+def fmt(value, err):
+    if not np.isfinite(err):
+        return f"{value:.4g}(n/d)"
+    return format_error(value, err)
+
+def print_fit_result(label, L_fit, popt, perr, dof, chi2_red):
+    beta_c, x0, nu = popt
+    err_beta_c, err_x0, err_nu = perr
+
+    print(f"{label} (usati {len(L_fit)} punti, dof={dof}):")
+    print(fr"  $\beta_{{pc}}(L) = {fmt(beta_c, err_beta_c)}  {fmt(x0, err_x0)} \cdot L^{{-1/{fmt(nu, err_nu)}}}$")
+    if not np.all(np.isfinite(perr)):
+        print("  (errore sui parametri non stimabile: covarianza singolare -- con dof=0 il fit passa esattamente per i punti)")
+    if dof > 0:
+        print(f"  chi^2/dof = {chi2_red:.3g}  (fit non pesato: vedi nota in fit_beta_pc)")
+    else:
+        print("  chi^2/dof = n/d (dof=0, il fit passa esattamente per i punti)")
+    print("-" * 70)
+
+def stability_analysis(L_all, beta_all, p0=(0.4407, -0.2, 1.0)):
+    print()
+    print("=" * 70)
+    print(" ANALISI DI STABILITÀ DEL FIT (rimozione progressiva L piccoli)")
+    print("=" * 70)
+
+    L_all = np.asarray(L_all, dtype=float)
+    beta_all = np.asarray(beta_all, dtype=float)
+
+    for L_min in np.sort(np.unique(L_all)):
+        mask = L_all >= L_min
+        curr_L = L_all[mask]
+        curr_beta = beta_all[mask]
+
+        if len(curr_L) < 3:
+            print(f"Fit con L >= {L_min:<4}: saltato (servono almeno 3 taglie, ne restano {len(curr_L)})")
+            print("-" * 70)
+            continue
+
+        try:
+            popt, perr, dof, chi2_red = fit_beta_pc(curr_L, curr_beta, p0=p0)
+        except RuntimeError as e:
+            print(f"Fit con L >= {L_min:<4}: non convergente ({e})")
+            print("-" * 70)
+            continue
+
+        print_fit_result(f"Fit con L >= {L_min:<4}", curr_L, popt, perr, dof, chi2_red)
+
+sim_name = input("Simulation name: ")
 alg = input("Algorithm (metropolis/wolff): ")
 
 filename = f"data/{sim_name}/metadata.csv"
@@ -60,7 +141,7 @@ fig, ax = plt.subplots(figsize=(12, 8))
 colors = plt.cm.Blues(np.linspace(.2,1,metadata.shape[0]))
 
 beta_max = []
-CV_max = [] 
+CV_max = []
 
 LL = metadata["L"]
 
@@ -90,6 +171,16 @@ beta_max = np.asarray(beta_max)
 CV_max = np.asarray(CV_max)
 
 
+# --- fit FSS: beta_pc(L) = beta_c + x0 * L^(-1/nu), tutte le taglie ---
+print()
+print("=" * 70)
+print(" FIT FSS: beta_pc(L) = beta_c + x0 * L^(-1/nu)  (tutte le taglie)")
+print("=" * 70)
+popt_all, perr_all, dof_all, chi2_red_all = fit_beta_pc(np.asarray(LL, dtype=float), beta_max)
+print_fit_result("Fit su tutte le taglie", LL, popt_all, perr_all, dof_all, chi2_red_all)
+
+# --- test di consistenza: rimozione progressiva delle taglie piccole ---
+stability_analysis(LL, beta_max)
 
 
 # aggiusto i grafici
